@@ -1,0 +1,51 @@
+#!/www/server/panel/pyenv/bin/python3
+# coding: utf-8
+# =============================================================================
+#  Network File System (NFS) — Free Edition
+#  Auto-Mount Service Bootstrap
+# =============================================================================
+#  Description : Lightweight entry point executed by the SysV init script
+#                (/etc/init.d/nfs_free) at system boot. Configures the Python
+#                module search path, imports nfs_free_main, and calls
+#                auto_mount() to mount all NFS shares configured with
+#                auto_mount=1 in config/mount.json.
+#
+#                Failures are silently swallowed because at early boot the
+#                NFS configuration may not exist yet (first install) or the
+#                remote server may not be reachable. The plugin panel will
+#                report mount status on the next dashboard load.
+#
+#  Invoked by  : /etc/init.d/nfs_free  (via init.sh)
+#  Interpreter : /www/server/panel/pyenv/bin/python3  (panel virtualenv)
+#                Falls back to /usr/bin/python3 if the virtualenv is absent
+#                (handled by init.sh before executing this script).
+#
+#  Author      : Jose Alexis Correa Valencia (jalexiscv)
+#  Email       : jalexiscv@gmail.com
+#  GitHub      : https://github.com/jalexiscv
+#  LinkedIn    : https://www.linkedin.com/in/jalexiscv/
+#  Version     : 1.0
+#  License     : MIT — Free Software
+#  Date        : July 7, 2023
+#  Copyright   : © 2023 Jose Alexis Correa Valencia
+# =============================================================================
+
+import sys
+import os
+
+PANEL_PATH = '/www/server/panel'
+
+# Run from the panel root so that relative imports inside aaPanel work correctly
+os.chdir(PANEL_PATH)
+
+# Prepend plugin and panel class directories to the module search path
+sys.path.insert(0, PANEL_PATH + '/plugin/nfs_free')
+sys.path.insert(0, PANEL_PATH + '/class')
+
+try:
+    import nfs_free_main
+    m = nfs_free_main.nfs_free_main()
+    m.auto_mount()
+except Exception:
+    # Silent fail — NFS may not be configured yet at first boot
+    pass
