@@ -1,0 +1,2606 @@
+<style>
+	/* ── Dashboard ─────────────────────────────────────────── */
+	.nfs-dash { padding: 0 15px 15px; }
+	.nfs-dash-header {
+		background: linear-gradient(135deg, #1a252f 0%, #2c3e50 60%, #2980b9 100%);
+		border-radius: 6px; padding: 18px 24px 16px;
+		display: flex; align-items: center; justify-content: space-between;
+		margin-bottom: 14px; color: #fff;
+	}
+	.nfs-dash-title { font-size: 20px; font-weight: 700; letter-spacing: .5px; }
+	.nfs-dash-title small { display: block; font-size: 11px; font-weight: 400;
+		opacity: .7; margin-top: 2px; }
+	.nfs-dash-status { text-align: right; font-size: 12px; line-height: 1.9; }
+	.nfs-dash-dot { display: inline-block; width: 9px; height: 9px;
+		border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+	.nfs-dash-dot.up   { background: #2ecc71; box-shadow: 0 0 6px #2ecc71; }
+	.nfs-dash-dot.down { background: #e74c3c; box-shadow: 0 0 6px #e74c3c; }
+
+	.nfs-cards { display: flex; gap: 12px; margin-bottom: 14px; }
+	.nfs-card {
+		flex: 1; background: #fff; border-radius: 6px;
+		border: 1px solid #e8e8e8; padding: 14px 16px;
+		box-shadow: 0 1px 4px rgba(0,0,0,.06); position: relative; overflow: hidden;
+	}
+	.nfs-card::before {
+		content: ''; position: absolute; top: 0; left: 0;
+		width: 4px; height: 100%; border-radius: 6px 0 0 6px;
+	}
+	.nfs-card.blue::before   { background: #3498db; }
+	.nfs-card.green::before  { background: #27ae60; }
+	.nfs-card.orange::before { background: #e67e22; }
+	.nfs-card.teal::before   { background: #16a085; }
+	.nfs-card-val { font-size: 28px; font-weight: 700; color: #2c3e50; line-height: 1; }
+	.nfs-card.blue .nfs-card-val   { color: #2980b9; }
+	.nfs-card.green .nfs-card-val  { color: #27ae60; }
+	.nfs-card.orange .nfs-card-val { color: #d35400; }
+	.nfs-card.teal .nfs-card-val   { color: #16a085; }
+	.nfs-card-lbl { font-size: 11px; color: #888; margin-top: 4px; text-transform: uppercase; letter-spacing: .5px; }
+	.nfs-card-sub { font-size: 11px; color: #aaa; margin-top: 6px; }
+
+	.nfs-dash-body { display: flex; gap: 12px; }
+	.nfs-dash-activity { flex: 1; background: #fff; border-radius: 6px;
+		border: 1px solid #e8e8e8; padding: 14px 16px;
+		box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+	.nfs-dash-actions { width: 190px; background: #fff; border-radius: 6px;
+		border: 1px solid #e8e8e8; padding: 14px 16px;
+		box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+	.nfs-dash-section-title {
+		font-size: 11px; font-weight: 700; color: #999; text-transform: uppercase;
+		letter-spacing: .8px; margin-bottom: 10px; padding-bottom: 6px;
+		border-bottom: 1px solid #f0f0f0;
+	}
+	.nfs-act-row { display: flex; align-items: center; padding: 5px 0;
+		border-bottom: 1px solid #f8f8f8; font-size: 12px; gap: 6px; }
+	.nfs-act-row:last-child { border-bottom: none; }
+	.nfs-act-icon { width: 18px; height: 18px; border-radius: 50%; display: inline-flex;
+		align-items: center; justify-content: center; font-size: 10px;
+		flex-shrink: 0; color: #fff; }
+	.nfs-act-icon.ok  { background: #27ae60; }
+	.nfs-act-icon.err { background: #e74c3c; }
+	.nfs-act-icon.inf { background: #7f8c8d; }
+	.nfs-act-evt { font-weight: 600; color: #2c3e50; min-width: 62px; flex-shrink: 0; }
+	.nfs-act-path { color: #555; font-family: monospace; font-size: 11px;
+		overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+	.nfs-act-time { color: #bbb; font-size: 10px; flex-shrink: 0; }
+	.nfs-dash-btn {
+		display: block; width: 100%; margin-bottom: 8px; padding: 7px 10px;
+		border-radius: 4px; border: 1px solid #ddd; background: #fafafa;
+		cursor: pointer; font-size: 12px; text-align: left; color: #2c3e50;
+		transition: all .15s;
+	}
+	.nfs-dash-btn:hover { background: #f0f7ff; border-color: #3498db; color: #2980b9; }
+	.nfs-dash-btn i { margin-right: 6px; }
+	.nfs-dash-refresh { font-size: 10px; color: #bbb; margin-top: 8px; text-align: right; }
+
+	/* ── end Dashboard ──────────────────────────────────────── */
+
+	/* ── Shared list improvements ───────────────────────────── */
+	.nfs-badge {
+		display: inline-block; padding: 2px 7px; border-radius: 3px;
+		font-size: 11px; font-weight: 700; line-height: 1.6; white-space: nowrap;
+	}
+	.nfs-badge-rw   { background: #d5f5e3; color: #1e8449; border: 1px solid #a9dfbf; }
+	.nfs-badge-ro   { background: #d6eaf8; color: #1a5276; border: 1px solid #a9cce3; }
+	.nfs-badge-sync { background: #fef9e7; color: #9a7d0a; border: 1px solid #f9e79f; }
+	.nfs-badge-async{ background: #f4f6f7; color: #717d7e; border: 1px solid #d5d8dc; }
+	.nfs-badge-sq-open   { background: #fadbd8; color: #922b21; border: 1px solid #f1948a; }
+	.nfs-badge-sq-root   { background: #fef9e7; color: #9a7d0a; border: 1px solid #f9e79f; }
+	.nfs-badge-sq-all    { background: #d5f5e3; color: #1e8449; border: 1px solid #a9dfbf; }
+	.nfs-badge-ip-open   { background: #fdf2f8; color: #76448a; border: 1px solid #d7bde2; }
+	.nfs-badge-ip-strict { background: #eafaf1; color: #1e8449; border: 1px solid #a9dfbf; }
+
+	.nfs-ports-panel {
+		margin: 10px 15px 4px;
+		border: 1px solid #e0e0e0; border-radius: 6px; overflow: hidden;
+	}
+	.nfs-ports-header {
+		background: #f0f4f8; padding: 9px 16px;
+		font-size: 12px; font-weight: 700; color: #34495e;
+		border-bottom: 1px solid #e0e0e0; letter-spacing: .3px;
+	}
+	.nfs-ports-header span { color: #7f8c8d; font-weight: 400; margin-left: 6px; }
+	.nfs-ports-cards {
+		display: flex; background: #fff;
+	}
+	.nfs-port-card {
+		flex: 1; padding: 10px 14px; border-right: 1px solid #f0f0f0;
+		text-align: center;
+	}
+	.nfs-port-card:last-child { border-right: none; }
+	.nfs-port-num {
+		font-size: 17px; font-weight: 700; color: #2980b9;
+		font-family: monospace; line-height: 1.2;
+	}
+	.nfs-port-name { font-size: 12px; font-weight: 600; color: #2c3e50; margin: 3px 0 2px; }
+	.nfs-port-proto { font-size: 10px; color: #95a5a6; }
+	.nfs-port-desc  { font-size: 10px; color: #7f8c8d; margin-top: 2px; }
+	.nfs-ports-warning {
+		background: #fef9e7; border-top: 1px solid #f9e79f;
+		padding: 7px 14px; font-size: 11px; color: #7d6608;
+		display: flex; align-items: center; gap: 8px;
+	}
+	.nfs-ports-warning b { color: #9a7d0a; }
+	/* ── end Shared list improvements ───────────────────────── */
+
+	/* ── Service Status redesign ─────────────────────────────── */
+	@keyframes nfs-pulse-up {
+		0%   { box-shadow: 0 0 0 0 rgba(46,204,113,.7) }
+		70%  { box-shadow: 0 0 0 9px rgba(46,204,113,0) }
+		100% { box-shadow: 0 0 0 0 rgba(46,204,113,0) }
+	}
+	@keyframes nfs-pulse-dn {
+		0%   { box-shadow: 0 0 0 0 rgba(231,76,60,.5) }
+		70%  { box-shadow: 0 0 0 7px rgba(231,76,60,0) }
+		100% { box-shadow: 0 0 0 0 rgba(231,76,60,0) }
+	}
+	.nfs-svc-wrap { padding: 14px 15px; }
+	.nfs-svc-row  { display: flex; gap: 14px; margin-bottom: 14px; }
+	.nfs-svc-card {
+		flex: 1; background: #fff; border-radius: 7px;
+		border: 1px solid #e0e0e0; padding: 18px 20px;
+		box-shadow: 0 2px 6px rgba(0,0,0,.05);
+	}
+	.nfs-svc-card.running { border-left: 4px solid #2ecc71; }
+	.nfs-svc-card.stopped { border-left: 4px solid #e74c3c; }
+	.nfs-svc-head { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+	.nfs-svc-dot  { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+	.nfs-svc-dot.up   { background: #2ecc71; animation: nfs-pulse-up 2s infinite; }
+	.nfs-svc-dot.down { background: #e74c3c; animation: nfs-pulse-dn 2s infinite; }
+	.nfs-svc-name  { font-size: 15px; font-weight: 700; color: #2c3e50; flex: 1; }
+	.nfs-svc-badge { font-size: 11px; font-weight: 700; padding: 2px 9px;
+		border-radius: 10px; letter-spacing: .5px; }
+	.nfs-svc-badge.up   { background: #d5f5e3; color: #1e8449; border: 1px solid #a9dfbf; }
+	.nfs-svc-badge.down { background: #fadbd8; color: #922b21; border: 1px solid #f1948a; }
+	.nfs-svc-desc  { font-size: 12px; color: #95a5a6; margin: 8px 0 14px; line-height: 1.5; }
+	.nfs-svc-btns  { display: flex; gap: 6px; flex-wrap: wrap; }
+	.nfs-svc-btn {
+		padding: 5px 13px; border-radius: 4px; font-size: 12px; cursor: pointer;
+		border: 1px solid; transition: all .15s; font-weight: 500;
+	}
+	.nfs-svc-btn.act-stop    { background: #fadbd8; color: #922b21; border-color: #f1948a; }
+	.nfs-svc-btn.act-start   { background: #d5f5e3; color: #1e8449; border-color: #a9dfbf; }
+	.nfs-svc-btn.act-restart { background: #fef9e7; color: #7d6608; border-color: #f9e79f; }
+	.nfs-svc-btn.act-reload  { background: #d6eaf8; color: #1a5276; border-color: #a9cce3; }
+	.nfs-svc-btn:hover { opacity: .8; }
+
+	.nfs-rpc-section {
+		background: #fff; border-radius: 7px; border: 1px solid #e0e0e0;
+		padding: 14px 16px; margin-bottom: 14px;
+		box-shadow: 0 2px 6px rgba(0,0,0,.05);
+	}
+	.nfs-rpc-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+	.nfs-rpc-title { font-size: 13px; font-weight: 700; color: #2c3e50; flex: 1; }
+	.nfs-rpc-count { font-size: 11px; color: #95a5a6; }
+	.nfs-rpc-filter { display: flex; gap: 4px; }
+	.nfs-rpc-fbtn {
+		padding: 2px 10px; border-radius: 3px; font-size: 11px; cursor: pointer;
+		border: 1px solid #ddd; background: #f8f8f8; color: #555; transition: all .12s;
+	}
+	.nfs-rpc-fbtn.active { background: #2980b9; color: #fff; border-color: #2980b9; }
+	.nfs-rpc-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+	.nfs-rpc-chip {
+		display: inline-flex; align-items: center; gap: 5px;
+		padding: 4px 10px; border-radius: 4px; font-size: 11px;
+		font-family: monospace; border: 1px solid;
+	}
+	.nfs-rpc-chip.tcp { background: #eaf4fc; color: #1a5276; border-color: #a9cce3; }
+	.nfs-rpc-chip.udp { background: #fef9e7; color: #7d6608; border-color: #f9e79f; }
+	.nfs-rpc-chip .proto  { font-weight: 700; font-size: 9px; opacity: .8; }
+	.nfs-rpc-chip .port   { font-weight: 700; }
+	.nfs-rpc-chip .svcname{ opacity: .75; }
+
+	.nfs-stat-section {
+		background: #fff; border-radius: 7px; border: 1px solid #e0e0e0;
+		padding: 14px 16px; box-shadow: 0 2px 6px rgba(0,0,0,.05);
+	}
+	.nfs-stat-tabs-bar { display: flex; gap: 4px; margin-bottom: 14px; flex-wrap: wrap; }
+	.nfs-stat-tab-btn {
+		padding: 4px 14px; border-radius: 4px; font-size: 12px; cursor: pointer;
+		border: 1px solid #ddd; background: #f8f8f8; color: #555; transition: all .12s;
+	}
+	.nfs-stat-tab-btn.active { background: #2c3e50; color: #fff; border-color: #2c3e50; }
+	.nfs-stat-cards { display: flex; flex-wrap: wrap; gap: 8px; }
+	.nfs-stat-card {
+		min-width: 110px; flex: 1; background: #f8f9fa; border-radius: 5px;
+		padding: 10px 12px; border: 1px solid #e9ecef; text-align: center;
+	}
+	.nfs-stat-card.key { background: #eaf4fc; border-color: #a9cce3; }
+	.nfs-stat-num { font-size: 22px; font-weight: 700; color: #2980b9; line-height: 1.1; }
+	.nfs-stat-card.key .nfs-stat-num { color: #1a5276; }
+	.nfs-stat-lbl { font-size: 10px; color: #888; text-transform: uppercase;
+		letter-spacing: .5px; margin-top: 4px; }
+	/* ── end Service Status redesign ─────────────────────────── */
+	.bt-w-main::after {
+		content: '';
+		display: block;
+		width: 0;
+		clear: both;
+	}
+
+	.bt-w-con {
+		float: left;
+		margin-left: 0;
+		width: 970px;
+		height: 100%;
+		padding: 0;
+	}
+
+	.bt-w-menu {
+		width: 130px;
+	}
+
+	.bt-w-item {
+		display: none;
+		height: 100%;
+		width: 100%;
+		overflow-y: auto;
+	}
+	
+	.bt-w-item.active {
+		display: inline-block;
+	}
+	
+	.bt_table {
+		width: 100%;
+	}
+	
+	.clear-overflow .layui-layer-content {
+		overflow: inherit !important;
+	}
+	
+	.bt-input-text {
+		padding: 0 10px;
+	}
+	
+	.guide_body {
+		padding: 10px 0;
+	}
+	
+	.guide_path {
+		display: flex;
+		padding: 30px 20px 30px 20px;
+	}
+	
+	.guide_path span {
+		display: inline-block;
+		flex: 1;
+		text-align: center;
+		position: relative;
+		z-index: 99999;
+	}
+	
+	.guide_path span i:nth-child(1) {
+		display: block;
+		width: 30px;
+		height: 30px;
+		margin: 0 auto;
+		border-radius: 50%;
+		background: #d0d0d0;
+		color: #777;
+		text-align: center;
+		line-height: 31px;
+		font-size: 16px;
+		font-style: inherit;
+	}
+	
+	.guide_path span i:nth-child(2) {
+		display: block;
+		font-style: inherit;
+		font-size: 12px;
+		margin-top: 10px;
+		color: #666;
+	}
+	
+	.guide_path span.active i:nth-child(1) {
+		background: #20a53a;
+		color: #fff;
+	}
+	
+	.guide_path span.active i:nth-child(2) {
+		color: #20a53a;
+	}
+	
+	.guide_path_progress {
+		margin: 0 120px;
+		height: 3px;
+		display: inline-block;
+		position: absolute;
+		top: 54px;
+	}
+	
+	.guide_path_progress span:nth-child(1) {
+		width: 0;
+		display: inline-block;
+		background: #20a53a;
+		height: 3px;
+		z-index: 980;
+		position: absolute;
+		left: 0;
+	}
+	
+	.guide_path_progress span:nth-child(2) {
+		width: 380px;
+		display: inline-block;
+		background: #cccccc;
+		height: 3px;
+		position: absolute;
+		z-index: 900;
+		left: 0;
+	}
+	
+	.guide_content {
+		display: inline-block;
+		padding: 0 50px 20px 50px;
+		width: 100%;
+	}
+	.guide_content_title {
+		margin-bottom: 15px;
+		font-size: 13px;
+	}
+	
+	.guide_content_text {
+		border: 1px solid #eee;
+		max-height: 280px;
+		overflow-y: auto;
+	}
+	
+	.guide_content_text span {
+		width: 100%;
+		height: 40px;
+		line-height: 40px;
+		display: block;
+		padding-left: 40px;
+		font-size: 13px;
+		cursor: pointer;
+		position: relative;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	
+	.guide_content_text span.search_null {
+		text-align: center;
+		padding: 0;
+	}
+	
+	.guide_content_text span.search_null:after {
+		border: none;
+	}
+	
+	.guide_content_text span i em {
+		color: #999;
+		font-style: normal;
+		text-overflow: ellipsis;
+		margin-left: 20px;
+	}
+	
+	.guide_content_text span i {
+		display: inline-block;
+		font-style: inherit;
+		margin-right: 15px;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: pre;
+		width: 100%;
+	}
+	
+	.guide_content_text span i:nth-child(2) {
+		color: #999;
+		font-size: 12px;
+	}
+	
+	
+	
+	.guide_content_text span.active:after {
+		content: '';
+		display: inline-block;
+		border: 1px solid #20a53a;
+		border-radius: 50%;
+		height: 16px;
+		width: 16px;
+		position: absolute;
+		left: 15px;
+		top: 11px;
+		background: #20a53a;
+		z-index: 900;
+	}
+	
+	.guide_content_text span.tips {
+		background: #e0e0e0;
+	}
+	
+	.guide_content_text span.active:before {
+		content: '';
+		display: inline-block;
+		border-bottom: 1.5px solid #ffffff;
+		border-right: 1.5px solid #ffffff;
+		width: 6px;
+		height: 10px;
+		transform: rotate(45deg);
+		position: absolute;
+		left: 20px;
+		top: 13px;
+		z-index: 999;
+	}
+	
+	.guide_content_text span:after {
+		content: '';
+		display: inline-block;
+		border: 1px solid #bdbdbd;
+		border-radius: 50%;
+		height: 16px;
+		width: 16px;
+		position: absolute;
+		left: 15px;
+		top: 11px;
+	}
+	.bt-disabled{
+		background-color: #fafafa;
+	}
+	
+	.bt_form_separate{
+		/*padding: 8px;*/
+		position: relative;
+		width: 100%;
+		padding-left: 200px;
+	}
+	.bt_form_separate span{
+		display: inline-block;
+		position: relative;
+		z-index: 9;
+		font-size: 12px;
+		cursor: pointer;
+	}
+	.bt_form_separate>span {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		width: 280px;
+	}
+	.disk_group_item{
+		margin-bottom: 5px;
+		font-size: 12px;
+		padding-left: 5px;
+	}
+	.disk_group_content{
+		margin-bottom: 20px;
+	}
+	.tab-body .tab-block{
+		width: 100%;
+		
+	}
+	.tab-body .tab-con{
+		padding: 0;
+		padding-top: 15px;
+	}
+	.size_ellipsis.path_width{
+		width: 120px;
+		vertical-align: bottom;
+	}
+	.nfsServer,.rpcbindServer{ display: none; }
+	.bt_table .divtable{
+		border: 1px solid #e6e6e6;
+	}
+	.bt_table .divtable table{
+		border: 0;
+	}
+	.bt_table .divtable thead{
+		position: relative;
+		z-index: 1;
+	}
+	.nfsServerTabel .divtable {
+		height: 330px !important;
+	}
+	.nfs-log-toolbar {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		padding: 10px 0 12px 0;
+		flex-wrap: wrap;
+	}
+	.nfs-log-toolbar select, .nfs-log-toolbar input {
+		height: 30px;
+		border: 1px solid #ddd;
+		border-radius: 3px;
+		padding: 0 8px;
+		font-size: 12px;
+		color: #555;
+		background: #fff;
+	}
+	.nfs-log-toolbar input { width: 140px; }
+	.nfs-log-badge {
+		display: inline-block;
+		padding: 1px 7px;
+		border-radius: 10px;
+		font-size: 11px;
+		font-weight: bold;
+		color: #fff;
+		white-space: nowrap;
+	}
+	.nfs-log-badge.mount      { background: #3498db; }
+	.nfs-log-badge.umount     { background: #8e44ad; }
+	.nfs-log-badge.connection { background: #27ae60; }
+	.nfs-log-badge.share      { background: #16a085; }
+	.nfs-log-badge.mount_cfg  { background: #d35400; }
+	.nfs-log-badge.admin      { background: #7f8c8d; }
+	.nfs-log-badge.exports    { background: #95a5a6; }
+	.nfs-log-badge.auto       { background: #2980b9; }
+	.nfs-log-result-ok  { color: #27ae60; font-weight: bold; }
+	.nfs-log-result-err { color: #c0392b; font-weight: bold; }
+	.nfs-log-row-err td { background: #fff8f8 !important; }
+	.nfs-log-ip { font-family: monospace; font-size: 12px; color: #2c3e50; }
+	.nfs-log-path { font-family: monospace; font-size: 11px; color: #555;
+	                max-width: 200px; overflow: hidden; text-overflow: ellipsis;
+	                white-space: nowrap; display: inline-block; vertical-align: bottom; }
+	.nfs-log-dur  { font-size: 11px; color: #999; }
+	.nfs-autorefresh-on  { background: #27ae60 !important; color: #fff !important; }
+	.nfs-autorefresh-off { background: #ecf0f1 !important; color: #555 !important; }
+</style>
+<div class="bt-content">
+	<div class="bt-w-main">
+		<div class="bt-w-menu">
+			<p class="bgw">Overview</p>
+			<p>Shared list</p>
+			<p>Mount list</p>
+			<p>Service status</p>
+			<p>Activity log</p>
+		</div>
+		<div class="bt-w-con">
+			<div class="bt-w-item active">
+				<div id="nfsDashboard"></div>
+			</div>
+			<div class="bt-w-item">
+				<div id="sharedTable" class="pd15"></div>
+				<div class="nfs-ports-panel">
+					<div class="nfs-ports-header">
+						&#128274; Required NFS ports
+						<span>— these must be open on the <b>server</b> firewall for clients to connect</span>
+					</div>
+					<div class="nfs-ports-cards">
+						<div class="nfs-port-card">
+							<div class="nfs-port-num">111</div>
+							<div class="nfs-port-name">RPC Bind</div>
+							<div class="nfs-port-proto">TCP &amp; UDP</div>
+							<div class="nfs-port-desc">Port mapper — lets clients discover NFS services</div>
+						</div>
+						<div class="nfs-port-card">
+							<div class="nfs-port-num">2049</div>
+							<div class="nfs-port-name">NFS</div>
+							<div class="nfs-port-proto">TCP</div>
+							<div class="nfs-port-desc">Main file-sharing protocol</div>
+						</div>
+						<div class="nfs-port-card">
+							<div class="nfs-port-num">20048</div>
+							<div class="nfs-port-name">Mountd</div>
+							<div class="nfs-port-proto">TCP &amp; UDP</div>
+							<div class="nfs-port-desc">Handles mount/unmount requests from clients</div>
+						</div>
+						<div class="nfs-port-card">
+							<div class="nfs-port-num">32874+</div>
+							<div class="nfs-port-name">Lock &amp; Stat</div>
+							<div class="nfs-port-proto">TCP &amp; UDP</div>
+							<div class="nfs-port-desc">File locking and crash recovery (lockd / statd)</div>
+						</div>
+					</div>
+					<div class="nfs-ports-warning">
+						<span style="font-size:15px">&#9888;</span>
+						<span><b>Security tip:</b> restrict these ports to specific client IP addresses using the
+						<b>System Firewall</b> plugin — leaving them open to the internet exposes your files to unauthorized access.</span>
+					</div>
+				</div>
+			</div>
+			<div class="bt-w-item">
+				<div id="mountTable" class="pd15"></div>
+			</div>
+			<div class="bt-w-item">
+				<div id="nfsStatus" class="pd15"></div>
+			</div>
+			<div class="bt-w-item">
+				<div id="nfsActivityLog" class="pd15"></div>
+			</div>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+	bt_tools.form = function (config) {
+		var _that = this;
+		function ReaderForm(config) {
+				this.config = config;
+				this.data = config.data || {};
+				this.$load();
+		}
+		ReaderForm.prototype = {
+				element: null,
+				style_list: [], // 样式列表
+				event_list: {}, // 事件列表,已绑定事件
+				event_type: ['click', 'event', 'focus', 'keyup', 'blur', 'change'],
+				hide_list: [],
+				form_element: {},
+				form_config: {},
+				random: bt.get_random(5),
+				$load: function () {
+						var that = this;
+						if (that.el) {
+								this.$reader_content(function () {
+										that.$event_bind();
+								});
+						}
+				},
+	
+				/**
+				 * @description 渲染Form内容
+				 * @param {Function} callback 回调函数
+				 */
+				$reader_content: function (callback) {
+						var that = this,
+								html = '',
+								_content = '';
+						$.each(that.config.form, function (index, item) {
+							if(item.separate){
+								html += '<div class="bt_form_separate"><span class="btn btn-sm btn-default">'+ item.separate +'</span></div>'
+							}else{
+								html += that.$reader_content_row(index, item);
+							}
+						});
+						that.element = $('<form class="bt-form" data-form="' + that.random + '">' + html + '</form>');
+						_content = $('<div class="' + _that.$verify(that.config.class) + '"></div>');
+						_content.append(that.element);
+						if (callback) callback();
+						return _content[0].outerHTML;
+				},
+	
+				/**
+				 * @description 渲染行内容
+				 * @param {object} data Form数据
+				 * @param {number} index 下标
+				 * @return {string} HTML结构
+				 */
+				$reader_content_row: function (index, data) {
+						var that = this,help = data.help,labelWidth =  data.formLabelWidth || this.config.formLabelWidth;
+						return '<div class="line' + _that.$verify(data.class) + _that.$verify(data.hide, 'hide', true) + '"' + _that.$verify(data.id, 'id') + '>' +
+								(data.label ? '<span class="tname" '+ (labelWidth?'style="width:'+ labelWidth +'"':'') +'>' + data.label + '</span>' : '') +
+								'<div class="' + (data.label ? 'info-r' : '') + _that.$verify(data.line_class) + '"' + _that.$verify(that.$reader_style($.extend(data.style,labelWidth?{'margin-left':labelWidth}:{})), 'style') + '>' +
+								that.$reader_form_element(data.group, index) +
+								(help ? ('<div class="c9 mt5 ' + _that.$verify(help.class, 'class') + '" ' + _that.$verify(that.$reader_style(help.style), 'style') + '>' + help.list.join('</br>') + '</div>') : '') +
+								'</div>' +
+							'</div>';
+				},
+	
+				/**
+				 * @description 渲染form类型
+				 * @param {object} data 表单数据
+				 * @param {number} index 下标
+				 * @return {string} HTML结构
+				 */
+				$reader_form_element: function (data, index) {
+						var that = this,html = '';
+						if (!Array.isArray(data)) data = [data];
+						$.each(data, function (key, item) {
+								item.find_index = index;
+								html+= that.$reader_form_find(item);
+								that.form_config[item.name] = item;
+						});
+						return html;
+				},
+				/**
+				 * @descripttion 渲染单个表单元素
+				 * @param {Object} item 配置
+				 * @return: viod
+				 */
+				$reader_form_find:function(item){
+						var that = this,html = '',style = that.$reader_style(item.style) + _that.$verify(item.width, 'width', 'style'),
+						attribute = that.$verify_group(item, ['name', 'value', 'placeholder', 'disabled', 'readonly', 'autofocus', 'autocomplete', 'min', 'max']),
+						event_group = that.$create_event_config(item),
+						eventName = '',index = item.find_index;
+						html += item.label ? '<span class="mr5">' + item.label + '</span>' : '';
+						if (typeof item['name'] !== "undefined") that.event_list[item.name] = event_group;
+						html += '<div class="'+ (item.dispaly || 'inlineBlock') +'">';
+						switch (item.type) {
+								case 'text': // 文本选择
+								case 'checkbox': // 复选框
+								case 'password': // 密码
+								case 'radio': // 单选框
+								case 'number': // 数字
+										var _event = 'event_' + item.name + '_' + that.random;
+										switch(item.type){
+												case 'checkbox': // 复选框
+													html += '<label class="cursor-pointer form-checkbox-label"><i class="form-checkbox cursor-pointer mr5 '+ _event + '_label"></i><input type="checkbox" class="form-checkbox-input mr10 '+ _event +'" name="'+ item.name +'" /><span class="vertical_middle">'+ item.title +'</span></label>';
+													that.event_list[_event + '_label'] = {click:{type:'checkbox_icon',config:item}};
+													that.event_list[_event] = {input:{type:'checkbox',config:item}};
+												break;
+												default:
+													html += '<input type="' + item.type + '"' + attribute + ' ' + (item.icon ? 'id="' + _event + '"' : '') + ' class="bt-input-' + (item.type != 'select_path' ? item.type : 'text') + ' mr10 ' + (item.label ? 'vertical_middle' : '') + _that.$verify(item.class, 'class') + '"' + _that.$verify(style, 'style') + ' value="'+ (that.data[item.name] || item.value || '') +'"/>';
+												break;
+										}
+										if(item.btn && !item.disabled){
+											html += '<span class="btn ' + item.btn.type + ' ' + item.name + '_btn cursor" ' + _that.$verify(that.$reader_style(item.btn.style), 'style') + '>'+ item.btn.title +'</span>';
+											if(typeof item.btn.event !== 'undefined'){
+												that.event_list[item.name + '_btn'] = {
+													'click': {
+														config: item,
+														event:item.btn.event
+													}
+												};
+											}
+										}
+										if(item.icon){
+												html += '<span class="glyphicon ' + item.icon.type + ' ' + item.name + '_icon cursor '+ (item.disabled?'hide':'') +'" ' + _that.$verify(that.$reader_style(item.icon.style), 'style') + '></span>';
+												if(typeof item.icon.event !== 'undefined'){
+														that.event_list[item.name + '_icon'] = {
+																'click': {
+																		type: 'select_path',
+																		config: item,
+																		event:item.icon.event
+																}
+														};
+												}
+										}
+										html += item.unit?'<span>'+ item.unit +'</span>':'';
+								break;
+								case 'textarea':
+										html += '<textarea class="bt-input-text"' + _that.$verify(style, 'style') + attribute + ' >' + (item.value || '') + '</textarea>';
+										$.each(['blur', 'focus', 'input'], function (index, items) {
+												if (item.tips) {
+														var added = null;
+														switch (items) {
+																case 'blur':
+																		added = function (ev,item,element){
+																				if ($(this).val() === '') $(this).next().show();
+																				layer.close(item.tips.loadT);
+																				$(ev.target).data('layer','');
+																		}
+																		break;
+																case 'focus':
+																		added = function (ev, item) {
+																				$(this).next().hide();
+																				item.tips.loadT = layer.tips(tips, $(this), {
+																						tips: [1, '#20a53a'],
+																						time: 0,
+																						area: $(this).width()
+																				});
+																		}
+																		break;
+														}
+												}
+												that.event_list[item.name][items] ? (that.event_list[item.name][items]['added'] = added) : (that.event_list[item.name][items] = {
+														type: item.type,
+														cust: false,
+														event: item[items],
+														added: added
+												});
+										});
+										if (item.tips) {
+												var tips = '';
+												if (typeof item.tips.list === "undefined") {
+														tips = item.tips.text;
+												} else {
+														tips = item.tips.list.join('</br>');
+												}
+												html += '<div class="placeholder c9 ' + item.name + '_tips" ' + _that.$verify(that.$reader_style(item.tips.style), 'style') + '>' + tips + '</div>';
+												that.event_list[item.name + '_tips'] = {
+														'click': {
+																type: 'textarea_tips',
+																config: item
+														}
+												};
+										}
+										break;
+								case 'select':
+										html += that.$reader_select(item, style, attribute, index);
+										that.event_list['custom_select'] = {
+												'click': {
+														type: 'custom_select',
+														children: '.bt_select_value'
+												}
+										};
+										that.event_list['custom_select_item'] = {
+												'click': {
+														type: 'custom_select_item',
+														children: 'li.item'
+												}
+										};
+										break;
+								case 'link':
+										eventName = 'event_' + bt.get_random(6);
+										html += '<a href="' + (item.href || 'javascript:;') + '" class="btlink offsetY7' + _that.$verify(item.class, 'class') + ' ' + eventName + '" ' + _that.$verify(that.$reader_style(item.style), 'style') + '>' + item.title + '</a>';
+										that.event_list[eventName] = {
+												'click': {
+														type: 'link_event',
+														event: item.event
+												}
+										}
+										break;
+								case 'help':
+										var _html = '';
+										$.each(item.list, function (index, items) {
+												_html += '<li>' + items + '</li>';
+										})
+										html += '<ul class="help-info-text c7' + _that.$verify(item.class) + '"' + _that.$verify(that.$reader_style(item.style), 'style') + '>' + _html + '</ul>';
+										break;
+						}
+						html += '</div>'
+						return html;
+				},
+				/**
+				 * @description 创建事件配置
+				 * @param {object} item 行内配置
+				 * @return {object} 配置信息
+				 */
+				$create_event_config: function (item) {
+						var config = {};
+						if (typeof item['name'] === "undefined") return {};
+						$.each(this.event_type, function (key, items) {
+								if (item[items]) {
+										config[(items === 'event' ? 'click' : items)] = {
+												type: item.type,
+												event: item[items],
+												cust: (['select', 'checkbox', 'radio'].indexOf(item.type) > -1),
+												config: item
+										};
+								}
+						});
+						return config;
+				},
+				/**
+				 * @description 渲染样式
+				 * @param {object|string} data 样式配置
+				 * @return {string} 样式
+				 */
+				$reader_style: function (data) {
+						var style = '';
+						if (typeof data === 'string') return data;
+						if (typeof data === 'undefined') return '';
+						$.each(data, function (key, item) {
+								style += key + ':' + item + ';';
+						});
+						return style;
+				},
+				/**
+				 * @descripttion 局部刷新form表单元素
+				 * @param {String} name 需要刷新的元素
+				 * @param {String} name 元素新数据
+				 * @return: viod
+				 */
+				$local_refresh:function(name,config){
+					var formFind = this.element.find('[data-name='+name+']')
+						if(this.element.find('[data-name='+name+']').length === 0) formFind = this.element.find('[name='+ name +']')
+						formFind.parent().empty().append(this.$reader_form_find(config))
+				},
+        /**
+                   * @description 渲染下拉，内容方法
+                   */
+                  $reader_select: function (item, style, attribute, index) {
+                      var that = this,list = '',option = '',active = {};
+                      if (!Array.isArray(item.list)) {
+                          var config = item.list;
+                          bt_tools.send({
+                              url: config.url,
+                              data: config.param || config.data || {}
+                          }, function (res) {
+                              if (res.status !== false) {
+                                var list = item.list.dataFilter ? item.list.dataFilter(res,that) : res;
+                                if(item.list.success) item.list.success(res,that,that.config.form[index],list)
+                                item.list = list
+                                if(!item.list.length){
+                                  item.disabled = true
+                                  layer.msg(item.placeholder || 'Data is empty',{icon:2})
+                                }
+                                that.$replace_render_content(index);
+                              } else {
+                                bt.msg(res);
+                              }
+                          });
+                      }
+                      if(typeof that.data[item.name] === "undefined") active = item.list[0]
+                      $.each(item.list, function (key, items) {
+                        if(items.value === item.value || items.value === that.data[item.name]){
+                            active = items
+                            return false
+                        }
+                      })
+                      $.each(item.list, function (key, items) {
+                        list += '<li class="item' + _that.$verify(items.value === active.value ? 'active' : '') + ' ' + (items.disabled ? 'disabled' : '') + '" title="'+ items.title +'">' + items.title + '</li>';
+                        option += '<option value="' + items.value + '"' + (items.disabled ? 'disabled' : '') + ' ' + _that.$verify(items.value === active.value ? 'selected' : '') + '>' + items.title + '</option>';
+                      });
+                      var title = !Array.isArray(item.list)?'getting data':(active?active.title:item.placeholder)
+                      return '<div class="bt_select_updown mr10 ' + (item.disabled?'bt-disabled':'') + ' ' + + _that.$verify(item['class']) + '" ' + _that.$verify(style, 'style') + ' data-name="' + item.name + '">' +
+                        '<span class="bt_select_value"><span class="bt_select_content" title="'+ (title || item.placeholder) +'">' + (title || item.placeholder || 'No data') + '</span><span class="glyphicon glyphicon-triangle-bottom ml5"></span></span>' +
+                        '<ul class="bt_select_list">' + (list || '') + '</ul>' +
+                        '<select' + attribute + ' class="hide" ' + (item.disabled ? 'disabled' : '') + ' autocomplete="off">' + (option || '') + '</select>' +
+                      '</div>';
+                  },
+	
+				/**
+				 * @description 替换渲染内容
+				 */
+				$replace_render_content: function (index) {
+					var that = this,config = this.config.form[index];
+					$('[data-form=' + that.random + ']').find('.line:eq(' + index + ')').replaceWith(that.$reader_content_row(index, config));
+				},
+	
+				/**
+				 * @description 事件绑定功能
+				 * @param {Array} eventList 事件列表
+				 * @param {Function} callback 回调函数
+				 * @return void
+				 */
+				$event_bind: function (eventList, callback) {
+						var that = this,_event = {};
+						that.element = $(typeof eventList === 'object' ? that.element : ('[data-form=' + that.random + ']'));
+						if (typeof eventList === 'undefined') _event = that.event_list;
+						$.each(_event, function (key, item) {
+								if ($.isEmptyObject(item)) return true;
+								$.each(item, function (keys, items) {
+										var childNode = '';
+										if (typeof items.cust === "boolean") {
+												childNode = '[' + (items.cust ? 'data-' : '') + 'name=' + key + ']';
+										} else {
+												childNode = '.' + key;
+										}
+										(function (items, key) {
+												if (items.onEvent === false) {
+														switch (items.type) {
+																case 'input_checked':
+																		$(childNode).on(keys != 'event' ? keys : 'click', function (ev) {
+																				items.event.apply(this, [ev, that]);
+																		});
+																		break;
+														}
+														return true;
+												} else {
+														that.element.on(keys != 'event' ? keys : 'click', items.children ? items.children : childNode, function (ev) {
+																var form = that.$get_form_element(true), value = that.$get_form_value(), config = that.form_config[key];
+																switch (items.type) {
+																		case 'textarea_tips':
+																				$(this).hide().prev().focus();
+																				break;
+																		case 'custom_select':
+																				if ($(this).parent().hasClass('bt-disabled')) return false;
+																				var select_value = $(this).next();
+																				if (!select_value.hasClass('show')) {
+																						$('.bt_select_list').removeClass('show');
+																						select_value.addClass('show');
+																				} else {
+																						select_value.removeClass('show');
+																				}
+																				$(document).click(function () {
+																						that.element.find('.bt_select_list').removeClass('show');
+																						$(this).unbind('click');
+																						return false;
+																				});
+																				return false;
+																				break;
+																		case 'custom_select_item':
+																				config = that.form_config[$(this).parents('.bt_select_updown').attr('data-name')], item_config = config.list[$(this).index()]
+																				if ($(this).hasClass('disabled')) {
+																						$(this).parent().removeClass('show');
+																						if (item_config.tips) layer.msg(item_config.tips, {
+																								icon: 2
+																						});
+																						return true;
+																				}
+																				if (!$(this).hasClass('active') && !$(this).hasClass('disabled')) {
+																						$(this).parent().prev().find('.bt_select_content').text($(this).text());
+																						$(this).addClass('active').siblings().removeClass('active');
+																						$(this).parent().next().val(item_config.value.toString());
+																						$(this).parent().removeClass('show');
+																						$(this).parent().next().trigger("change");
+																				}
+																				break;
+																		case 'select_path':
+																				bt.select_path('event_' + $(this).prev().attr('name') + '_' + that.random,items.config.icon.select||"");
+																				break;
+																		case 'checkbox':
+																				var checked = $(this).is(':checked');
+																				if(checked){
+																						$(this).prev().addClass('active');
+																				}else{
+																						$(this).prev().removeClass('active');
+																				}
+																		break;
+																}
+																if (items.event) items.event.apply(this, [value,form, that, config, ev]); // 事件
+																if (items.added) items.added.apply(this, [ev,config,form]);
+														});
+												}
+										}(items, key));
+								});
+						});
+						if (callback) callback();
+				},
+	
+				/**
+				 * @description 获取表单数据
+				 * @return {object} 表单数据
+				 */
+				$get_form_value:function(){
+						return this.element.serializeObject();
+				},
+	
+				/**
+				 * @description 设置指定数据
+				 *
+				 */
+				$set_find_value: function (name, value) {
+						var config = {},that = this;
+						typeof name != 'string' ? config = name : config[name] = value;
+						$.each(config, function (key, item) {
+								that.form_element[key].val(item);
+						});
+				},
+	
+				/**
+				 * @description 获取Form，jquery节点
+				 * @param {Boolean} afresh 是否强制刷新
+				 * @return {object}
+				 */
+				$get_form_element: function (afresh) {
+						var form = {},
+								that = this;
+						if (afresh || $.isEmptyObject(that.form_element)) {
+								this.element.find(':input').each(function (index) {
+										form[$(this).attr('name')] = $(this);
+								});
+								that.form_element = form;
+								return form;
+						} else {
+								return that.form_element;
+						}
+				},
+	
+				/**
+				 * @description 验证值整个列表是否存在，存在则转换成属性字符串格式
+				 */
+				$verify_group: function (config, group) {
+						var that = this,
+								str = '';
+						$.each(group, function (index, item) {
+								if (typeof config[item] === "undefined") return true;
+								if (['disabled', 'readonly'].indexOf(item) > -1) {
+										str += ' ' + (config[item] ? (item + '="' + item + '"') : '');
+								} else {
+										str += ' ' + item + '="' + config[item] + '"';
+								}
+						});
+						return str;
+				},
+	
+				/**
+				 * @description 验证绑定事件
+				 * @param {String} value
+				 */
+				$verify_bind_event: function (eventName, row, group) {
+						var event_list = {};
+						$.each(group, function (index, items) {
+								var event_fun = row[items];
+								if (event_fun) {
+										if (typeof event_list[eventName] === "object") {
+												if (!Array.isArray(event_list[eventName])) event_list[eventName] = [event_list[eventName]];
+												event_list[eventName].push({
+														event: event_fun,
+														eventType: items
+												});
+										} else {
+												event_list[eventName] = {
+														event: event_fun,
+														eventType: items
+												};
+										}
+								}
+						});
+						return event_list;
+				},
+	
+				/**
+				 * @description 验证值是否存在
+				 * @param {String} value 内容/值
+				 * @param {String|Boolean} attr 属性
+				 * @param {String} type 属性
+				 */
+				$verify: function (value, attr, type) {
+						if (!value) return '';
+						if (type === true) return value ? ' ' + attr : '';
+						if (type === 'style') return attr ? attr + ':' + value + ';' : value;
+						return attr ? ' ' + attr + '="' + value + '"' : ' ' + value;
+				},
+				/**
+				 * @description 验证form表单
+				*/
+				$verify_form:function(){
+						var form_list = {},form = this.config.form,form_value = this.$get_form_value(),form_element = this.$get_form_element(true);
+						for(var key = 0; key< form.length; key++){
+								var item = form[key];
+								if(!Array.isArray(item.group)) item.group = [item.group];
+								if(item.separate) continue
+								for(var i=0;i<item.group.length;i++){
+										var items = item.group[i],name = items.name;
+										if(items.type === 'help') continue;
+										if(typeof items.verify != "undefined"){
+												var value = items.verify(form_value[name],form_element[name],items,true);
+												if(value === false && form_value[name] !== false) return false;
+												form_list[name] = value;
+										}else{
+											form_list[name] = (typeof form_value[name]  === "undefined" && items.disabled)?$('[name="'+ name +'"]').val():form_value[name];
+										}
+								}
+						}
+						return form_list;
+				},
+				/**
+				 * @description 提交内容，需要传入url
+				 * @param {Object|Function} param 附加参数或回调函数
+				 * @param {Function} callback 回调
+				*/
+				$submit: function (param,callback,tips) {
+						var form = this.$verify_form();
+						if(typeof param === "function") tips = callback,callback = param,param = {};
+						if(!form) return false;
+						form = $.extend(form,param);
+						if(typeof this.config.url == "undefined"){
+								bt_tools.msg('Request submission address cannot be empty！',false);
+								return false;
+						}
+						bt_tools.send({
+								url:this.config.url,
+								data:form
+						},function(res){
+								if(callback){
+										callback(res,form);
+								}else{
+										bt_tools.msg(res);
+								}
+						},(tips || 'Submitting'));
+				}
+		}
+		return new ReaderForm(config);
+	}
+	bt_tools.open = function (config) {
+      var _config = {},layerT = null,form = null;
+      _config = $.extend({type: 1,area: '640px',closeBtn: 2,btn: ['Confirm', 'Cancel']},config);
+      if(typeof _config.content == "object"){
+        var param = _config.content;
+        form = bt_tools.form(param);
+        _config.success = function(layero,indexs){
+          form.$event_bind();
+          if(typeof config.success != "undefined")  config.success(layero,indexs);
+        }
+        _config.yes = function(indexs,layero){
+          var form_val = form.$verify_form();
+          if(!form_val) return false;
+          if(typeof config.yes != "undefined"){
+            var yes = config.yes.apply(form,[form_val,indexs,layero]);
+            if(!yes) return false;
+          }
+        }
+        _config.content = form.$reader_content();
+      }
+      layerT = layer.open(_config);
+      return {
+        close: function () {
+            layer.close(layerT);
+        },
+        form:form
+      }
+    }
+	bt_tools.server = function(config){
+		function Server(){
+			this.config = config
+			if(typeof config.el == "undefined") return false
+			this.$load()
+		}
+		Server.prototype = {
+			$load:function (){
+				this.el = $(config.el)
+				$(this.el).html(this.$reader_content())
+				if(config.success) config.success(this.el)
+				this.$event_bind()
+			},
+			$reader_content:function (config){
+				if(typeof config != "undefined") this.config = config
+				var btnGroup = '',configs = this.config
+				for (var groupKey in configs.group) {
+					if (configs.group.hasOwnProperty(groupKey)) {
+						btnGroup += '<button class="btn btn-default btn-sm" data-type="'+ groupKey +'">'+ configs.group[groupKey]  +'</button>'
+					}
+				}
+				return '<p class="status">'+ (configs.name || 'Current') +' status：<span>'+ (configs.status?' running':' stopped') +'</span>' +
+					'<span style="color: '+ (configs.status?'#20a53a':'red') +'; margin-left: 3px;" class="glyphicon glyphicon-'+ (configs.status?'play':'pause') +'"></span>' +
+				'</p><div class="sfm-opt">' + btnGroup +'</div>'
+			},
+			$event_bind:function (){
+				var that = this
+				$(config.el).on('click','button.btn',function(ev){
+					that.config.event.apply(this,[ev,$(this).data('type'),that.el,config])
+				})
+			}
+		}
+		new Server()
+	}
+	bt_tools.tab = function (config) {
+        var _that = this;
+        function ReaderTab(config) {
+            this.config = config;
+            this.theme = this.config.theme || {};
+            this.$load();
+        }
+        ReaderTab.prototype = {
+            type: 1,
+            theme_list: [{
+                    content: 'tab-body',
+                    nav: 'tab-nav',
+                    body: 'tab-con',
+                    active: 'on'
+                },
+                {
+                    content: 'bt-w-body',
+                    nav: 'bt-w-menu',
+                    body: 'bt-w-con'
+                }
+            ],
+            random: bt.get_random(5),
+            $init: function () {
+                var that = this,
+                    active = this.config.active,
+                    config = that.config.list,
+                    _theme = {};
+                this.$event_bind();
+                config[that.active]['init'] = true;
+            },
+            $load: function () {
+                var that = this;
+            },
+            $reader_content: function () {
+                var that = this,_list = that.config.list,_tab = '',_tab_con = '',_theme = that.theme,config = that.config;
+                if (typeof that.active === "undefined") that.active = 0;
+                if (!$.isEmptyObject(config.theme)) {
+                    _theme = this.theme_list[that.active];
+                    $.each(config.theme, function (key, item) {
+                        if (_theme[key]) _theme[key] += ' ' + item;
+                    });
+                    that.theme = _theme;
+                }
+                if (config.type && $.isEmptyObject(config.theme)) this.theme = this.theme_list[that.active];
+                $.each(_list, function (index, item) {
+                    var active = (that.active === index ? true : false),
+                        _active = _theme['active'] || 'active';
+                    _tab += '<span class="' + (active ? _active : '') + '">' + item.title + '</span>';
+                    _tab_con += '<div class="tab-block ' + (active ? _active : '') + '">' + (active ? item.content : '') + '</div>';
+                });
+                that.element = $('<div id="tab_' + that.random + '" class="' + _theme['content'] + _that.$verify(that.config.class) + '"><div class="' + _theme['nav'] + '" >' + _tab + '</div><div class="' + _theme['body'] + '">' + _tab_con + '</div></div>');
+                return that.element[0].outerHTML;
+            },
+            /**
+             * @description 事件绑定
+             */
+            $event_bind: function () {
+                var that = this,
+                    _theme = that.theme,
+                    active = _theme['active'] || 'active';
+                if (!that.el) that.element = $('#tab_' + that.random);
+                that.element.on('click', ('.' + _theme['nav'].replace(/\s+/g, '.') + ' span'), function () {
+                    var index = $(this).index(), config = that.config.list[index] ,tab_content = $('.' + _theme['body'] + '>div:eq(' + index + ')');
+                    that.active = index;
+                    $(this).addClass(active).siblings().removeClass(active);
+                    tab_content.addClass(active).siblings().removeClass(active);
+                    if(!config.hasOwnProperty('init')){
+                        tab_content.html(config.content)
+                        config.init = true
+                    }
+                    if (config.success && config.hasOwnProperty('init')){
+                        config.success();
+                    }
+                });
+            }
+        }
+        return new ReaderTab(config);
+    }
+	
+	function NfsTools() {
+		var that = this
+		that.url = "/plugin?action=a&name=nfs_free&s="
+		that.sharedTabel = null
+		that.mountTabel = null
+		window._nfsToolsInstance = that
+		that.event = function () {
+			$(".layui-layer-page").css("width", "1100px")
+			$(".bt-w-menu p").on("click", function () {
+				var index = $(this).index()
+				$(this).addClass("bgw").siblings().removeClass("bgw")
+				$(".bt-w-item:eq(" + index + ")").addClass("active").siblings().removeClass("active")
+				// stop dashboard auto-refresh when leaving tab 0
+			if (index !== 0) clearInterval(that._dashTimer)
+
+			switch (index) {
+					case 0:
+						that.initOverview()
+						break;
+					case 1:
+						if(that.sharedTabel){
+							that.getSharedList()
+						}else{
+							that.initSharedList()
+							that.getSharedList()
+						}
+						break;
+					case 2:
+						if(that.mountTabel){
+							that.getMountListData()
+						}else{
+							that.mountTabel = that.getMountList()
+							that.getMountListData()
+						}
+						break;
+					case 3:
+						that.toObtainServiceStatus()
+						break;
+					case 4:
+						that.initActivityLog()
+						break;
+				}
+			}).eq(0).click()
+		}
+		that.event()
+	}
+	
+	NfsTools.prototype = {
+		
+		// ── Dashboard ────────────────────────────────────────────
+		_dashTimer: null,
+
+		initOverview: function () {
+			var that = this
+			clearInterval(that._dashTimer)
+			$('#nfsDashboard').html('<div style="padding:30px;text-align:center;color:#aaa">Loading dashboard…</div>')
+			that._loadOverview()
+			that._dashTimer = setInterval(function () { that._loadOverview() }, 30000)
+		},
+
+		_loadOverview: function () {
+			var that = this
+			bt_tools.send({ url: that.url + 'get_overview', data: {} }, function (res) {
+				$('#nfsDashboard').html(that._renderDashboard(res))
+				// wire quick-action buttons
+				$('#nfsDashBtnShares').on('click', function () { $('.bt-w-menu p').eq(1).click() })
+				$('#nfsDashBtnMounts').on('click', function () { $('.bt-w-menu p').eq(2).click() })
+				$('#nfsDashBtnService').on('click', function () { $('.bt-w-menu p').eq(3).click() })
+				$('#nfsDashBtnLog').on('click', function () { $('.bt-w-menu p').eq(4).click() })
+				$('#nfsDashBtnRefresh').on('click', function () { that._loadOverview() })
+			}, { verify: false })
+		},
+
+		_renderDashboard: function (d) {
+			var s = d.server || {}, m = d.mounts || {}, io = d.io || {}, log = d.recent_log || []
+			var nfsUp = s['nfs-server'], rpcUp = s['rpcbind']
+
+			// Header
+			var html = '<div class="nfs-dash">'
+			html += '<div class="nfs-dash-header">'
+			html += '<div>'
+			html += '<div class="nfs-dash-title">NFS Free Edition'
+			html += '<small>Network File System · by <a href="https://co.linkedin.com/in/jalexiscv" target="_blank" style="color:#7fb3d3;text-decoration:none;" onmouseover="this.style.textDecoration=\'underline\'" onmouseout="this.style.textDecoration=\'none\'">jalexiscv</a></small></div>'
+			html += '</div>'
+			html += '<div class="nfs-dash-status">'
+			html += '<span class="nfs-dash-dot ' + (nfsUp ? 'up' : 'down') + '"></span> NFS Server: <b>' + (nfsUp ? 'Running' : 'Stopped') + '</b><br>'
+			html += '<span class="nfs-dash-dot ' + (rpcUp ? 'up' : 'down') + '"></span> RPC Bind: <b>' + (rpcUp ? 'Running' : 'Stopped') + '</b>'
+			html += '</div></div>'
+
+			// Metric cards
+			var ioLabel = (io.read_kbs || 0) + ' kB/s ↓ &nbsp; ' + (io.write_kbs || 0) + ' kB/s ↑'
+			var diskColor = m.avg_disk >= 90 ? '#e74c3c' : m.avg_disk >= 75 ? '#e67e22' : '#27ae60'
+			html += '<div class="nfs-cards">'
+			html += '<div class="nfs-card blue">'
+			html +=   '<div class="nfs-card-val">' + (d.shares ? d.shares.total : 0) + '</div>'
+			html +=   '<div class="nfs-card-lbl">Shared exports</div>'
+			html +=   '<div class="nfs-card-sub">Local NFS paths</div>'
+			html += '</div>'
+			html += '<div class="nfs-card green">'
+			html +=   '<div class="nfs-card-val">' + m.mounted + ' <span style="font-size:14px;color:#aaa">/ ' + m.configured + '</span></div>'
+			html +=   '<div class="nfs-card-lbl">Mounts active</div>'
+			html +=   '<div class="nfs-card-sub">' + (m.untracked ? m.untracked + ' untracked' : 'all tracked') + '</div>'
+			html += '</div>'
+			html += '<div class="nfs-card orange">'
+			html +=   '<div class="nfs-card-val" style="color:' + diskColor + '">' + m.avg_disk + '<span style="font-size:14px">%</span></div>'
+			html +=   '<div class="nfs-card-lbl">Avg disk used</div>'
+			html +=   '<div class="nfs-card-sub">across all NFS mounts</div>'
+			html += '</div>'
+			html += '<div class="nfs-card teal">'
+			html +=   '<div class="nfs-card-val" style="font-size:20px;padding-top:4px">' + (io.ops || 0) + '<span style="font-size:12px"> ops/s</span></div>'
+			html +=   '<div class="nfs-card-lbl">NFS I/O</div>'
+			html +=   '<div class="nfs-card-sub">' + ioLabel + '</div>'
+			html += '</div>'
+			html += '</div>'
+
+			// Body: activity + actions
+			html += '<div class="nfs-dash-body">'
+
+			// Recent activity
+			html += '<div class="nfs-dash-activity">'
+			html += '<div class="nfs-dash-section-title">Recent activity</div>'
+			if (!log.length) {
+				html += '<div style="color:#bbb;font-size:12px;padding:10px 0">No activity recorded yet.</div>'
+			} else {
+				for (var i = 0; i < log.length; i++) {
+					var e = log[i]
+					var ok = e.result === 'success' || e.result === 'connected'
+					var iconCls = ok ? 'ok' : (e.result === 'disconnected' ? 'inf' : 'err')
+					var iconChar = ok ? '✓' : (e.result === 'disconnected' ? '↓' : '✗')
+					var evtLabel = (e.event || '').replace('_', ' ')
+					var path = e.local || e.path || e.filesystem || e.client || e.action || ''
+					var ts = (e.ts || '').slice(11, 16)
+					html += '<div class="nfs-act-row">'
+					html +=   '<span class="nfs-act-icon ' + iconCls + '">' + iconChar + '</span>'
+					html +=   '<span class="nfs-act-evt">' + evtLabel + '</span>'
+					html +=   '<span class="nfs-act-path" title="' + path + '">' + path + '</span>'
+					html +=   '<span class="nfs-act-time">' + ts + '</span>'
+					html += '</div>'
+				}
+			}
+			html += '</div>'
+
+			// Quick actions
+			html += '<div class="nfs-dash-actions">'
+			html += '<div class="nfs-dash-section-title">Quick access</div>'
+			html += '<button class="nfs-dash-btn" id="nfsDashBtnShares"><i class="glyphicon glyphicon-folder-open"></i> Shared list</button>'
+			html += '<button class="nfs-dash-btn" id="nfsDashBtnMounts"><i class="glyphicon glyphicon-link"></i> Mount list</button>'
+			html += '<button class="nfs-dash-btn" id="nfsDashBtnService"><i class="glyphicon glyphicon-cog"></i> Service status</button>'
+			html += '<button class="nfs-dash-btn" id="nfsDashBtnLog"><i class="glyphicon glyphicon-list-alt"></i> Activity log</button>'
+			html += '<hr style="margin:10px 0;border-color:#f0f0f0">'
+			html += '<button class="nfs-dash-btn" id="nfsDashBtnRefresh"><i class="glyphicon glyphicon-refresh"></i> Refresh now</button>'
+			html += '<div class="nfs-dash-refresh">Auto-refresh every 30s</div>'
+			html += '</div>'
+
+			html += '</div></div>'
+			return html
+		},
+		// ── end Dashboard ─────────────────────────────────────────
+
+		/**
+		 * @description 获取共享列表
+		 * @return tabel 表格构建方法
+		 */
+		initSharedList: function () {
+			var _that = this
+			this.sharedTabel = bt_tools.table({
+				el: "#sharedTable",
+				default: "Shared list is empty", //数据为空时的默认提示
+				height: 388,
+				data: [],
+				// dataFilter: function (res) {
+				// 	$(".accept-ports").text(res.ports);
+				// 	return {data: res.list}
+				// },
+				column: [
+					// {type: "checkbox",class: "",width: 20},
+				{
+					fid: "share_name",
+					title: "Name",
+					template:function(row){
+						return '<span class="size_ellipsis" style="width:70px" title="'+ row.share_name +'">'+ row.share_name +'</span>'
+					},
+					event: function (row, index, ev) {
+						_that.editorSharedFind(false, row, function () {
+							_that.getSharedList()
+						})
+					}
+				}, {
+					fid: "path",
+					title: "Shared path",
+					type: "link",
+					class: "size_ellipsis path_width",
+					event: function (row, index, ev) {
+						openPath(row.path);
+					}
+				}, {
+					fid: "limit_address",
+					title: "Allowed IP",
+					width: 110,
+					template: function (row) {
+						var ip = row.limit_address || '*'
+						var isOpen = !ip || ip === '*'
+						return '<span class="nfs-badge ' + (isOpen ? 'nfs-badge-ip-open' : 'nfs-badge-ip-strict') + '" title="' + ip + '">'
+							+ (isOpen ? '&#9679; Any IP' : '&#128274; ' + ip) + '</span>'
+					},
+				}, {
+					fid: "rw_mode",
+					title: "Access",
+					width: 60,
+					template: function (row) {
+						var isRw = row.rw_mode === 'rw'
+						return '<span class="nfs-badge ' + (isRw ? 'nfs-badge-rw' : 'nfs-badge-ro') + '" title="' + (isRw ? 'Read &amp; Write' : 'Read Only') + '">'
+							+ (isRw ? 'RW' : 'RO') + '</span>'
+					}
+				}, {
+					fid: "sync_mode",
+					width: 70,
+					title: "Sync",
+					template: function (row) {
+						var isSync = row.sync_mode === 'sync'
+						return '<span class="nfs-badge ' + (isSync ? 'nfs-badge-sync' : 'nfs-badge-async') + '" title="' + (isSync ? 'Real-time sync' : 'Async (buffered)') + '">'
+							+ (isSync ? '&#9201; Sync' : '&#9729; Async') + '</span>'
+					}
+				}, {
+					fid: "user",
+					title: "User",
+					template: function (row) {
+						return '<span class="size_ellipsis" style="width:80px;vertical-align:bottom;font-family:monospace;font-size:11px">' + (row.user || '') + '</span>'
+					}
+				}, {
+					fid: "squash",
+					title: "Root access",
+					width: 110,
+					template: function (row) {
+						var cls, label, title
+						switch (row.squash) {
+							case 'no_root_squash':
+								cls = 'nfs-badge-sq-open'; label = '&#9888; Root free'; title = 'Remote root has full root privileges — high risk'
+								break
+							case 'root_squash':
+								cls = 'nfs-badge-sq-root'; label = '&#128274; Root mapped'; title = 'Remote root mapped to anonymous user'
+								break
+							default:
+								cls = 'nfs-badge-sq-all'; label = '&#10003; All mapped'; title = 'All remote users mapped to anonymous — safest'
+						}
+						return '<span class="nfs-badge ' + cls + '" title="' + title + '">' + label + '</span>'
+					}
+				}, {
+					fid: "ps",
+					title: "Remark",
+					template:function (row){
+						return '<span class="size_ellipsis" style="width:80px;vertical-align: bottom;" title="'+ row.ps+'">'+ row.ps +'</span>'
+					}
+				}, {
+					title: "Operate",
+					type: "group",
+					width: 80,
+					align: "right",
+					group: [{
+						title: "Edit",
+						event: function (row, index, ev, key, that) {
+							_that.editorSharedFind(false, row, function () {
+								_that.getSharedList()
+							})
+						}
+					}, {
+						title: "Del",
+						event: function (row, index, ev, key, that) {
+							_that.removeShare(row, function () {
+								_that.getSharedList()
+							})
+						}
+					}]
+				}],
+				tootls: [{ // 按钮组
+					type: "group",
+					positon: ["left", "top"],
+					list: [{
+						title: "Add shared",
+						active: true,
+						event: function (ev, that) {
+							_that.editorSharedFind(true, {}, function () {
+								_that.getSharedList()
+							})
+						}
+					}]
+				}]
+			})
+		},
+		getSharedList: function () {
+			var that = this
+			var load = bt.load(lan.database.get_data)
+			$.post(this.url + 'get_share_list', function (res) {
+				load.close()
+				if (res.status === false) {
+					layer.msg(res.msg, {
+						icon: 2,
+						time: 0,
+						closeBtn: 1,
+						shade: [.3, '#000'],
+						shadeClose: true,
+						end: function () {
+							layer.closeAll()
+						}
+					})
+					return
+				}
+				$(".accept-ports").text(res.ports)
+				that.sharedTabel.$reader_content(res.list)
+			})
+		},
+		/**
+		 * @description 添加/编辑共享数据
+		 * @param {boolean|null} type 编辑状态，true:添加，false:编辑
+		 * @param {object|null} item 当前选中数据
+		 * @param {function} callback 回调函数
+		 */
+		editorSharedFind: function (type, item, callback) {
+			if (typeof type === "function") {
+				callback = type;
+				item = {};
+			}
+			var tips = type ? "Add" : "Edit", method = type ? "create_share" : "modify_share", that = this;
+			bt_tools.open({
+				title: tips + " Share Dir " + (!type ? " -- [ " + item.share_name + " ]" : ""),
+				skin: "clear-overflow",
+				area: "550px",
+				btn: [type?'Submit':'Save', "Cancel"],
+				content: {
+					class: "pd20",
+					formLabelWidth: "110px",
+					data: item || {},
+					form: [{
+						label: "Share Name",
+						group: {
+							type: "text",
+							name: "share_name",
+							placeholder: "Share Name",
+							width: "350px",
+							disabled:!type,
+							keyup:function(row,FomrElment,Form){
+								var ps_config = Form.config.form[7].group
+									ps_config.value = row.share_name
+								Form.$local_refresh('ps',ps_config)
+							}
+						}
+					}, {
+						label: "Share path",
+						group: {
+							type: "text", name: "path", icon: {
+								type: "glyphicon-folder-open", event: function (ev) {
+								}
+							}, value: item.path || "/www/wwwroot", placeholder: "Please select the path to share", width: "350px"
+						}
+					}, {
+						label: "IPs allowed",
+						group: {
+							type: "text",
+							name: "limit_address",
+							placeholder: "IPs allowed, e.g: 192.168.1.2 or 192.168.1.0/24",
+							width: "350px"
+						}
+					}, {
+						label: "Access user",
+						group: {
+							type: "select",
+							name: "user",
+							list: [
+								{title: "www", value: "www"},
+								{title: "root", value: "root"},
+								// {title: "mysql",value: "mysql"},
+								// {title: "redis", value: "redis"}
+							],
+							value: item.user,
+							width: "350px"
+						}
+					}, {
+						label: "read/write",
+						group: {
+							type: "select",
+							name: "rw_mode",
+							list: [ {title: "rw (read and write)", value: "rw"},{title: "r (read only)", value: "ro"}],
+							value: item.rw_mode,
+							width: "350px"
+						}
+					}, {
+						label: "Sync mode",
+						group: {
+							type: "select",
+							name: "sync_mode",
+							list: [{title: "Real-time - more secure data", value: "sync"}, {title: "Non-real-time - better performance", value: "async"}],
+							value: item.sync_mode,
+							width: "350px"
+						}
+					}, {
+						label: "Permission",
+						group: {
+							type: "select",
+							name: "squash",
+							list: [{title: "All users limited (recommended)", value: "all_squash"}, {
+								title: "root limited",
+								value: "root_squash"
+							}, {title: "Unrestricted root", value: "no_root_squash"}],
+							value: item.squash,
+							width: "350px"
+						}
+					}, {
+						label: "Remark",
+						group: {type: "text", name: "ps", width: "350px"}
+					},{
+						formLabelWidth:'15px',
+						group:{type:'help',style:{'margin-top': '5px','color':'#e67e22'},list:['&#9888; Required server ports: 111 (RPC Bind) · 2049 (NFS) · 20048 (Mountd) · 32874-65535 (Lock/Stat)','&#128274; Security: use the System Firewall plugin to restrict these ports to specific client IPs only.']}
+					}]
+				},
+				yes: function (form, indexs, layers) {
+					if (form.share_name === "") {
+						bt.msg({status: false, msg: "Share name cannot be empty!"})
+						return false
+					}
+					bt_tools.send(that.url + method, form, function (res) {
+						bt_tools.msg(res)
+						if (res.status) {
+							layer.close(indexs)
+							if (callback) callback(res)
+						}
+					})
+				}
+			})
+		},
+		
+		/**
+		 * @description 删除共享目录
+		 * @param {object} item 当前选中数据
+		 * @param {function} callback 回调函数
+		 */
+		removeShare: function (item, callback) {
+			var that = this
+			bt.confirm({
+				title: "Delete shared directory-[" + item.share_name + "]",
+				msg: "Delete shared directory, do you want to continue?"
+			}, function () {
+				bt_tools.send(that.url + "remove_share", {share_name: item.share_name}, function (res) {
+					bt_tools.msg(res)
+					if (res.status && callback) callback(res)
+				})
+			})
+		},
+		
+		/**
+		 * @description 获取挂载列表
+		 * @return tabel 表格构建方法
+		 */
+		getMountList: function () {
+			var _that = this
+			return  bt_tools.table({
+				el: "#mountTable",
+				default: "Mount list is empty", //数据为空时的默认提示
+				height: 400,
+				data: [],
+				column: [
+					// {type: "checkbox",class: "",width: 20},
+				{
+					fid: "mount_name",
+					title: "Name",
+					template:function (row){
+						return '<span class="size_ellipsis" style="width:60px;vertical-align: bottom;" title="'+ row.mount_name +'">'+ row.mount_name +'</span>'
+					}
+				}, {
+					fid: "server_address",
+					title: "NFS server",
+					template:function (row,index){
+						var info = row.server_address + ':' + row.nfs_path
+						return '<span class="size_ellipsis" style="width:180px;vertical-align: bottom;" title="'+ info +'">'+ info +'</span>'
+					}
+				},{
+					fid: "mount_path",
+					title: "Mount path",
+					type: "link",
+					class:'size_ellipsis path_width',
+					event: function (row, index, ev) {
+						openPath(row.mount_path);
+					}
+				}, {
+					fid: "mount_info",
+					width:160,
+					title: "Mount info",
+					template:function (row){
+						if(!row.mount_info) return '<span>Not mounted</span>'
+						var mount_info = row.mount_info,used_pre = parseFloat(mount_info.used_pre)
+						return '<div><div class="progress" style="margin-bottom: 0;height:16px;vertical-align: middle;width: 70%;display: inline-block">'+
+							'<div class="progress-bar progress-bar-'+ (used_pre >= 90?'danger':(used_pre >= 80?'warning':'success')) +'" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="line-height:16px;width: '+ mount_info.used_pre +'">'+ mount_info.used_pre + '</div>'+
+						'</div><div style="width: 30%;display: inline-block;padding-left: 10px;vertical-align: middle;"><span class="btlink ">View</span></div></div>'
+					},
+					event:function (row, index, ev, key, that){
+						_that.viewMountInformation(row)
+					}
+				},{
+					fid:'iostat',
+					width: 100,
+					title:'IO speed',
+					template:function (row){
+						if(!row.mount_info) return '<span>Not mounted</span>'
+						var iostat = row.iostat
+						if(!iostat) return '<span>No IO data</span>'
+						return '<span>Read: ' + (iostat.read_kbs||0) +'kb/s</br>Write: ' + (iostat.write_kbs||0) + 'kb/s</span>'
+					}
+				}, {
+					fid: "ps",
+					title: "Remark",
+					template:function (row){
+						return '<span class="size_ellipsis" style="width:90px;vertical-align: bottom;" title="'+ row.ps +'">'+ row.ps +'</span>'
+					}
+				}, {
+					title: "Operate",
+					type: "group",
+					width: 140,
+					align: "right",
+					group: [{
+						template:function (row){
+							return row.mount_info?'Umount':'Mount'
+						},
+						event: function (row, index, ev, key, that) {
+							_that.mountManage(row)
+						}
+					},{
+						title: "Edit",
+						event: function (row, index, ev, key, that) {
+							_that.modifyMount(row)
+						}
+					}, {
+						title: "Del",
+						event: function (row, index, ev, key, that) {
+							_that.removeMount(row)
+						}
+					}]
+				}],
+				tootls: [{ // 按钮组
+					type: "group",
+					positon: ["left", "top"],
+					list: [{
+						title: "Add mount",
+						active: true,
+						event: function (ev, that) {
+							_that.createMount()
+						}
+					}]
+				}]
+			})
+		},
+		getMountListData: function () {
+			var that = this
+			var load = bt.load(lan.database.get_data)
+			$.post(this.url + 'get_mount_list', function (res) {
+				load.close()
+				if (res.status === false) {
+					layer.msg(res.msg, {icon: 2, time: 0, closeBtn: 1, shade: [.3, '#000'], shadeClose: true, end: function () { layer.closeAll() }})
+					return
+				}
+				that.mountTabel.$reader_content(res.list)
+			})
+		},
+		/**
+		 * @description 查看挂载信息
+		 * @param {object} item 选中数据
+		 */
+		viewMountInformation:function (item){
+			var iostat = item.iostat,mount_info	= item.mount_info;
+			bt.open({
+				title:'Mount info - [ '+ mount_info.filesystem +' ]',
+				area:'550px',
+				btn:false,
+				content:'<div class="disk_group">' +
+						'<div class="disk_group_item">Disk</div>'+
+						'<div class="disk_group_content divtable">' +
+							'<table class="table table-hover table-bordered">' +
+								'<thead></thead>'+
+								'<tbody>' +
+									'<tr><td><strong>Disk size</strong></td><td>'+  bt.format_size(mount_info.used_size)+'/'+ bt.format_size(mount_info.size) +'</td></tr>' +
+									'<tr><td><strong>Mount path</strong></td><td>'+ mount_info.mount_path +'</td></tr>' +
+									'<tr><td><strong>NFS server</strong></td><td>'+ mount_info.filesystem +'</td></tr>' +
+								'</tbody>'+
+							'</table>'+
+						'</div>'+
+					'</div>'+
+					'<div class="disk_group">' +
+						'<div class="disk_group_item">Disk IO info</div>'+
+						'<div class="disk_group_content divtable">' +
+							'<table class="table table-hover table-bordered">' +
+								'<tbody>' +
+									'<tr><td><strong>Total IOPS</strong></td><td>'+ iostat.ops +'/s</td><td><strong>Queue length</strong></td><td>'+ iostat.rpc_bklog +'</td></tr>'+
+									'<tr><td><strong>Read IOPS</strong></td><td>'+ iostat.read_ops +'/s</td><td><strong>Read speed/sec</strong></td><td>'+ iostat.read_kbs +'kb/s</td></tr>'+
+									'<tr><td><strong>Read speed/time</strong></td><td>'+ iostat.read_kbop +'kb/次</td><td><strong>read retrans</strong></td><td>'+ iostat.read_retrans +'</td></tr>'+
+									'<tr><td><strong>Read time </strong></td><td>'+ iostat.read_avg_rtt_ms +'ms</td><td><strong>Total time to read</strong></td><td>'+ iostat.read_avg_exe_ms +'ms</td></tr>'+
+									'<tr><td><strong>Write IOPS</strong></td><td>'+ iostat.write_ops +'</td><td><strong>Write speed/sec</strong></td><td>'+ iostat.write_kbs +'kb/s</td></tr>'+
+									'<tr><td><strong>Write speed/time</strong></td><td>'+ iostat.write_kbop +'kb/次</td><td><strong>Write retries</strong></td><td>'+ iostat.write_retrans +'</td></tr>'+
+									'<tr><td><strong>Write time</strong></td><td>'+ iostat.write_avg_rtt_ms +'ms</td><td><strong>Total write time</strong></td><td>'+ iostat.write_avg_exe_ms +'ms</td></tr>'+
+								'</tbody>'+
+							'</table>'+
+						'</div>'+
+					'</div>',
+				success:function (){
+				
+				}
+			})
+		},
+		/**
+		 * @description 挂载管理、卸载/挂载目录
+		 * @param {object} item 选中数据
+	 	*/
+		mountManage:function (item){
+			var method = item.mount_info?'to_umount':'to_mount',tips = !item.mount_info?'Mount':'Umount',that = this
+			bt.show_confirm(tips + ' [' + item.mount_path + ']', 'Do you want to ' + tips + '? ' + (!item.mount_info ? 'Please make sure the mount path is not in use.' : 'Please make sure related services are stopped first.'), function () {
+				bt_tools.send({
+					url:that.url + method,
+					data:{mount_name:item.mount_name}
+				},function (res){
+					if(!res.status && method === 'to_mount'){
+						that._showMountError(res)
+					} else {
+						bt.msg(res)
+					}
+					that.getMountListData()
+				},{load:tips+'ing [' + item.mount_path + '], running diagnostics if needed...'})
+			})
+		},
+
+		_showMountError:function(res){
+			var msg = res.msg || 'Mount failed'
+			var lines = msg.split('\n')
+			var html = '<div style="font-family:monospace;font-size:13px;line-height:1.9;padding:5px 0">'
+			for(var i = 0; i < lines.length; i++){
+				var line = lines[i]
+				if(!line.trim()){ html += '<br>'; continue }
+				if(line.indexOf('Mount failed:') === 0){
+					html += '<div style="color:#c0392b;font-weight:bold;font-size:14px;margin-bottom:8px">'
+						+ '<span class="glyphicon glyphicon-remove-circle" style="margin-right:6px"></span>'
+						+ line.replace(/</g,'&lt;').replace(/>/g,'&gt;')
+						+ '</div>'
+				} else if(line.trim() === 'Diagnostic:'){
+					html += '<div style="color:#e67e22;font-weight:bold;margin-top:6px;border-top:1px solid #eee;padding-top:6px">'
+						+ '<span class="glyphicon glyphicon-search" style="margin-right:5px"></span>Diagnostic'
+						+ '</div>'
+				} else if(line.trim() === 'Suggestions:'){
+					html += '<div style="color:#27ae60;font-weight:bold;margin-top:6px;border-top:1px solid #eee;padding-top:6px">'
+						+ '<span class="glyphicon glyphicon-ok-circle" style="margin-right:5px"></span>Suggestions'
+						+ '</div>'
+				} else if(line.indexOf('  •') === 0){
+					html += '<div style="color:#555;padding-left:14px">'
+						+ '<span style="color:#e67e22">&#8226;</span> '
+						+ line.replace(/  •\s*/,'').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+						+ '</div>'
+				} else if(line.indexOf('  →') === 0){
+					html += '<div style="color:#2980b9;padding-left:14px">'
+						+ '<span style="color:#27ae60">&#8594;</span> '
+						+ line.replace(/  →\s*/,'').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+						+ '</div>'
+				} else {
+					html += '<div style="color:#555">' + line.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>'
+				}
+			}
+			html += '</div>'
+			layer.open({
+				type: 1,
+				title: '<span class="glyphicon glyphicon-warning-sign" style="color:#c0392b;margin-right:6px"></span>Mount Failed — Diagnostic Report',
+				area: ['600px','auto'],
+				maxHeight: window.innerHeight * 0.8 + 'px',
+				btn: ['Close'],
+				content: '<div style="padding:15px 20px;max-height:'+ Math.floor(window.innerHeight*0.7) +'px;overflow-y:auto">' + html + '</div>',
+				yes: function(idx){ layer.close(idx) }
+			})
+		},
+		
+		/**
+		 * @description 添加挂载数据
+		*/
+		createMount: function () {
+			var that = this
+			bt_tools.open({
+				title: "Add mount",
+				area: "600px",
+				btn: ['Confirm',"Cancel"],
+				content: {
+					class: "pd20",
+					formLabelWidth: "120px",
+					data: {},
+					form:[{
+						label:"NFS server IP",
+						group:{type:"text",name:"server_address",width:'250px',placeholder:'Please enter the NFS server IP, and click Get Shared Directory',value: '', btn:{
+							type:'btn-sm btn-default ',
+							title:'Click to get shared directory',
+							event: function(row,FomrElment,Form) {
+								if(!bt.check_ip(row.server_address)){
+									bt.msg({status:false,msg:'NFS server IP address wrong!'})
+									return false
+								}
+								bt_tools.send({
+									url: that.url + 'show_ip_share_list',
+									data: {server_address: row.server_address}
+								}, function (res) {
+									var sharedList = []
+									for (var i = 0; i < res.length; i++) {
+										sharedList.push({title:res[i].path,value:res[i].path})
+									}
+									for (var j = 0; j < Form.config.form.length; j++) {
+										var items = Form.config.form[j].group;
+										if(items.name === 'nfs_path'){
+											items.list = sharedList
+											delete items.tips
+										}
+										delete items.disabled
+										if(items.name == "server_address") items.value = row.server_address;
+										Form.$local_refresh(items.name,items)
+									}
+								}, {load: 'Detecting NFS server shared directory'})
+							}
+						}}
+					},{
+						label:"Shared path",
+						group:{type:"select",name:"nfs_path",list:[],tips:'<span style="color: #999;">Please enter the NFS server IP to get the share list</span>',width:'380px',disabled:true}
+					},{
+						label:"Mount name",
+						group:{type:"text",name:"mount_name",placeholder:"Please enter a mount name",width:'380px',disabled:true,keyup:function(row,FomrElment,Form){
+							var ps_config = Form.config.form[6].group
+								ps_config.value = row.mount_name
+							Form.$local_refresh('ps',ps_config)
+						}}
+					},{
+						label:"Mount path",
+						group: {
+							type: "text", name: "mount_path",disabled:true, icon: {
+								type: "glyphicon-folder-open", event: function (ev) {
+								}
+							}, value: "/www/wwwroot", placeholder: "Please select the file directory to share", width: "380px"
+						}
+					},{
+						label:"NFS version",
+						group:{type:"select",name:"vers",list:[{title:'NFS-3',value:3},{title:'NFS-4',value:4}],width:'380px',disabled:true}
+					},{
+						label:"Proto",
+						group:{type:"select",name:"proto",list:[{title:'TCP',value:'tcp'},{title:'UDP',value:'udp'}],width:'380px',disabled:true}
+					},{
+						label:"Remark",
+						group:{type:"text",name:"ps",width:'380px',placeholder:"Please enter the mount directory remarks",disabled:true}
+					},{
+						formLabelWidth:'70px',
+						group:{
+							type:'help',
+							style:{'margin-top':'0'},
+							list:['Please enter the IP on the NFS server first, and click Get the shared directory on the NFS server']
+						}
+					}]
+				},
+				yes:function (formData,indexs){
+					formData = $.extend(formData,{
+						rsize:1048576,
+						wsize:1048576,
+						hard:1,
+						retrans:5, // 重试次数
+						noresvport:0, // off by default (causes access denied with secure NFS)
+						timeo:10, // 重试时间
+						auto_mount:1 // 是否开机自动挂载
+					})
+					bt_tools.send({
+						url:that.url + 'create_mount',
+						load:'Setting mount directory configuration, please wait...',
+						data:formData
+					},function (res){
+						bt.msg(res)
+						if(res.status){
+							that.getMountListData()
+							layer.close(indexs)
+						}
+					})
+				}
+			})
+		},
+		
+		/**
+		 * @description 编辑挂载数据
+		 * @param {object} item 当前选中挂载的数据
+		*/
+		modifyMount:function (item){
+			var that = this
+			bt_tools.open({
+				title: "Edit mount path",
+				area: "640px",
+				btn: ['Confirm',"Cancel"],
+				content: {
+					class: "pd20",
+					formLabelWidth: "200px",
+					data:item || {},
+					form:[{
+						label:"NFS server IP",
+						group:{type:"text",name:"server_address",width:'280px',placeholder:'Please enter the NFS server IP, and click Get Shared path',disabled:true}
+					},{
+						label:"Share path",
+						group:{type:"text",name:"nfs_path",width:'280px',disabled:true}
+					},{
+						label:"Mount name",
+						group:{type:"text",name:"mount_name",placeholder:"Please enter a mount name",width:'280px',disabled:true}
+					},{
+						label:"Mount path",
+						group: {type: "text", name: "mount_path",icon: {type: "glyphicon-folder-open", event: function (ev) {}}, placeholder: "Please select the path to share", width: "280px"}
+					},{
+						label:"NFS version",
+						group:{type:"select",name:"vers",list:[{title:'NFS-3',value:3},{title:'NFS-4',value:4}],width:'280px'}
+					},{
+						label:"Proto",
+						group:{type:"select",name:"proto",list:[{title:'TCP',value:'tcp'},{title:'UDP',value:'udp'}],width:'280px'}
+					},{
+						label:"Remark",
+						group:{type:"text",name:"ps",width:'280px',placeholder:"Please enter the mount directory remarks"}
+					},{
+						separate:'<span>Click to enable advanced settings</span>&nbsp;<span class="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span>'
+					},{
+						label:"read block size",
+						hide:true,
+						group:{type:'text',name:"rsize",width:'280px',unit:'byte'}
+					},{
+						label:"write block size",
+						hide:true,
+						group:{type:'text',name:"wsize",width:'280px',unit:'byte'}
+					},{
+						label:"number of request retries",
+						hide:true,
+						group:{type:'text',name:"retrans",width:'280px',unit:'time'}
+					},{
+						label:"retry time",
+						hide:true,
+						group:{type:'text',name:"timeo",width:'280px',unit:'sec'}
+					},{
+						label:"Auto wait for recovery",
+						hide:true,
+						group:{type:'select',name:"hard",width:'280px',list:[{title:'on',value:1},{title:'off',value:0}]}
+					},{
+						label:"auto reconnection",
+						hide:true,
+						group:{type:'select',name:"noresvport",width:'280px',list:[{title:'on',value:1},{title:'off',value:0}]}
+					},{
+						label:"Auto mount",
+						hide:true,
+						group:{type:'select',name:"auto_mount",width:'280px',list:[{title:'on',value:1},{title:'off',value:0}]}
+					}]
+				},
+				yes:function (formData,indexs){
+					var load = bt.load('Setting mount directory configuration, please wait...')
+					bt_tools.send({
+						url:that.url + 'modify_mount',
+						load: 'Setting mount directory configuration, please wait...',
+						data: formData
+					},function (res){
+						load.close()
+						bt.msg(res)
+						if(res.status){
+							that.getMountListData()
+							layer.close(indexs)
+						}
+					})
+				},
+				success:function (layer,indesx){
+					$('.bt_form_separate').on('click',function (){
+						$(this).nextAll().removeClass('hide')
+						$(this).remove()
+						$(layer).css({'top':((window.innerHeight - 760) / 2) +'px'});	
+					})
+					layer.find('.layui-layer-content').css('overflow', 'visible')
+				}
+			})
+		},
+		
+		/**
+		 * @description 删除挂载目录
+		 * @param {object} item 当前选中数据
+		 * @param {function} callback 回调函数
+		 */
+		removeMount: function (item, callback) {
+			var that = this
+			bt.confirm({
+				title: "Delete the mount path - ["+ item.mount_path +"]",
+				msg: "After deleting the mount directory, the mount directory will be automatically unmounted. Do you want to continue?"
+			}, function () {
+				bt_tools.send(that.url + "remove_mount", {mount_name: item.mount_name}, function (res) {
+					bt_tools.msg(res)
+					if(res.status) that.getMountListData()
+				})
+			})
+		},
+		
+		/**
+		 * @description 获取服务状态
+		 */
+		toObtainServiceStatus:function (callabck){
+			var that = this
+			var load = bt.load('Getting data, please wait...')
+			bt_tools.send(this.url + "get_nfsstat", function (res) {
+				var tabList = [],nfsTitle = {
+					'nfsServerStatus':['Service status'],
+					'nfs_v3_server':['NFS-3 server status',{total:'Total op',other:'Other',getattr:'getattr',lookup:'lookup',access:'access',readlink:'readlink',read:'read',create:'create',mkdir:'mkdir',rmdir:'rmdir',readdirplus:'readdirplus',fsstat:'fsstat',fsinfo:'fsinfo',pathconf:'pathconf'}],
+					'nfs_v3_client':['NFS-3 client state',{total:'Total op',other:'Other',getattr:'getattr',lookup:'lookup',access:'access',readlink:'readlink',read:'read',create:'create',mkdir:'mkdir',rmdir:'rmdir',readdirplus:'readdirplus',fsstat:'fsstat',fsinfo:'fsinfo',pathconf:'pathconf'}],
+					'nfs_v4_server':['NFS-4 server status',{total:'Total time',other:'Other',compound:'compound'}],
+					'nfs_v4_servop':['NFS-4 server status',{total:'Total op',access:'access ',getattr:'getattr',getfh:'getfh',lookup:'lookup',putfh:'putfh',putrootfh:'putrootfh',readdir:'readdir',exchange_id:'exchange_id',create_ses:'create_ses',destroy_ses:'destroy_ses',secinfononam:'secinfononam',sequence:'sequence',destroy_clid:'destroy_clid',reclaim_comp:'reclaim_comp'}],
+					'nfs_v4_client':['NFS-4 client state',{total:"Total op",other:"Other",fsinfo:"fsinfo",access:"access ",getattr:"getattr",lookup:"lookup",lookup_root:"lookup_root",pathconf:"pathconf",statfs:"statfs",readdir:"readdir",server_caps:"server_caps",exchange_id:"exchange_id",create_session:"create_session",destroy_session:"destroy_session",reclaim_comp:"reclaim_comp",secinfo_no:"secinfo_no",destroy_clientid:"destroy_clientid"}]
+				}
+				for (var keys in nfsTitle) {
+					if (nfsTitle.hasOwnProperty(keys)) {
+						var item = nfsTitle[keys]
+						if(keys === 'nfsServerStatus'){
+							tabList.push({
+								title:item[0],
+								name:keys,
+								content: that.readerNfsServerStatus(),
+								success:function(){
+									$('.tab-body .tab-con .tab-block.on').html(that.readerNfsServerStatus())
+								}
+							})
+						}else if(res[keys]){
+							tabList.push({
+								title:item[0],
+								name:keys,
+								content:that.renderTable(item[1],res[keys],keys),
+								success:function (){
+									var keys = $('.tab-body .tab-con .tab-block.on table').data('key');
+									bt_tools.send(that.url + "get_nfsstat", function (res) {
+										$('.tab-body .tab-con .tab-block.on').html(that.renderTable(nfsTitle[keys][1],res[keys],keys))
+									})
+								}
+							})
+						}
+					}
+				}
+				var nfsStatus = bt_tools.tab({
+					type: 0,
+					theme: {nav:'mt0'},
+					init:false,
+					list: tabList
+				});
+				$('#nfsStatus').html(nfsStatus.$reader_content())
+				nfsStatus.$init()
+				setTimeout(function () {
+					load.close()
+				}, 1500)
+			})
+		},
+		renderTable: function (config, data, name) {
+			var KEY_OPS = ['read','write','create','lookup','access','readdir','readdirplus','commit']
+			var html = '<div class="nfs-stat-cards" data-key="' + name + '">'
+			for (var k in config) {
+				if (!config.hasOwnProperty(k)) continue
+				var isKey = KEY_OPS.indexOf(k) !== -1
+				var val = data[k] !== undefined ? data[k] : 0
+				html += '<div class="nfs-stat-card' + (isKey ? ' key' : '') + '">'
+				html +=   '<div class="nfs-stat-num">' + (typeof val === 'number' ? val.toLocaleString() : val) + '</div>'
+				html +=   '<div class="nfs-stat-lbl">' + config[k] + '</div>'
+				html += '</div>'
+			}
+			html += '</div>'
+			return html
+		},
+
+		// ─────────────────────────────────────────────────────────
+		// ACTIVITY LOG
+		// ─────────────────────────────────────────────────────────
+
+		_logAutoTimer: null,
+		_logAutoOn: false,
+		_logFilters: {event:'', result:'', ip:''},
+
+		initActivityLog: function () {
+			var that = this
+			var el = $('#nfsActivityLog')
+			el.html(that._renderLogShell())
+			that._bindLogToolbar()
+			that.getLogData()
+		},
+
+		_renderLogShell: function () {
+			return '<div class="nfs-log-toolbar">' +
+				'<select id="nfsLogEvt">' +
+					'<option value="">All events</option>' +
+					'<option value="mount">Mount</option>' +
+					'<option value="umount">Umount</option>' +
+					'<option value="connection">Connection</option>' +
+					'<option value="share_create">Share create</option>' +
+					'<option value="share_modify">Share modify</option>' +
+					'<option value="share_delete">Share delete</option>' +
+					'<option value="mount_create">Mount config create</option>' +
+					'<option value="mount_modify">Mount config modify</option>' +
+					'<option value="mount_delete">Mount config delete</option>' +
+					'<option value="server_admin">Server admin</option>' +
+					'<option value="auto_mount">Auto-mount</option>' +
+					'<option value="exports_reload">Exports reload</option>' +
+				'</select>' +
+				'<select id="nfsLogRes">' +
+					'<option value="">All results</option>' +
+					'<option value="success">Success</option>' +
+					'<option value="failed">Failed</option>' +
+				'</select>' +
+				'<input id="nfsLogIp" type="text" placeholder="Filter by IP…">' +
+				'<button class="btn btn-sm btn-default" id="nfsLogSearch">Search</button>' +
+				'<button class="btn btn-sm nfs-autorefresh-off" id="nfsLogAuto">⟳ Auto-refresh: OFF</button>' +
+				'<button class="btn btn-sm btn-default" id="nfsLogExport">Export JSON</button>' +
+				'<button class="btn btn-sm btn-danger"  id="nfsLogClear" style="margin-left:auto">Clear log</button>' +
+			'</div>' +
+			'<div id="nfsLogTable"></div>'
+		},
+
+		_bindLogToolbar: function () {
+			var that = this
+			$('#nfsLogSearch').on('click', function () {
+				that._logFilters.event  = $('#nfsLogEvt').val()
+				that._logFilters.result = $('#nfsLogRes').val()
+				that._logFilters.ip     = $('#nfsLogIp').val().trim()
+				that.getLogData()
+			})
+			$('#nfsLogAuto').on('click', function () {
+				that._logAutoOn = !that._logAutoOn
+				$(this).toggleClass('nfs-autorefresh-on nfs-autorefresh-off')
+				$(this).text('⟳ Auto-refresh: ' + (that._logAutoOn ? 'ON' : 'OFF'))
+				if (that._logAutoOn) {
+					that._logAutoTimer = setInterval(function () { that.getLogData() }, 30000)
+				} else {
+					clearInterval(that._logAutoTimer)
+				}
+			})
+			$('#nfsLogClear').on('click', function () {
+				bt.confirm({ title: 'Clear activity log', msg: 'Delete all log entries?' }, function () {
+					bt_tools.send(that.url + 'clear_log', {}, function (res) {
+						bt.msg(res)
+						if (res.status) that.getLogData()
+					})
+				})
+			})
+			$('#nfsLogExport').on('click', function () { that._exportLog() })
+		},
+
+		getLogData: function () {
+			var that = this
+			bt_tools.send({
+				url: that.url + 'get_log',
+				data: that._logFilters
+			}, function (res) {
+				that._renderLogTable(res.list || [], res.total || 0)
+			})
+		},
+
+		_renderLogTable: function (list, total) {
+			var that = this, el = $('#nfsLogTable')
+			if (!list.length) {
+				el.html('<div style="text-align:center;padding:40px;color:#aaa">No log entries found</div>')
+				return
+			}
+			var rows = ''
+			for (var i = 0; i < list.length; i++) {
+				rows += that._renderLogRow(list[i])
+			}
+			el.html(
+				'<div style="font-size:12px;color:#999;margin-bottom:6px">Showing ' + list.length + ' of ' + total + ' entries</div>' +
+				'<div class="divtable" style="max-height:480px;overflow-y:auto">' +
+				'<table class="table table-hover" style="font-size:12px;margin-bottom:0">' +
+				'<thead><tr>' +
+					'<th style="width:130px">Time</th>' +
+					'<th style="width:110px">Event</th>' +
+					'<th style="width:55px">Result</th>' +
+					'<th style="width:115px">Client IP</th>' +
+					'<th>Server / Path</th>' +
+					'<th style="width:65px">Duration</th>' +
+					'<th style="width:55px">Detail</th>' +
+				'</tr></thead>' +
+				'<tbody>' + rows + '</tbody>' +
+				'</table></div>'
+			)
+			$('#nfsLogTable .nfs-log-detail-btn').on('click', function () {
+				var entry = JSON.parse(decodeURIComponent($(this).attr('data-entry')))
+				that._showLogDetail(entry)
+			})
+		},
+
+		_renderLogRow: function (e) {
+			var badgeClass = this._logBadgeClass(e.event)
+			var badgeLabel = this._logLabel(e.event)
+			var resultHtml = e.result === 'success'
+				? '<span class="nfs-log-result-ok">&#10003;</span>'
+				: '<span class="nfs-log-result-err">&#10007;</span>'
+			var clientIp   = e.client_ip ? '<span class="nfs-log-ip">' + e.client_ip + '</span>' : '<span style="color:#bbb">local</span>'
+			var serverPath = this._logServerPath(e)
+			var dur        = e.duration ? '<span class="nfs-log-dur">' + (e.duration > 999 ? (e.duration/1000).toFixed(1)+'s' : e.duration+'ms') + '</span>' : ''
+			var hasDetail  = (e.issues && e.issues.length) || e.msg || e.changes || e.action
+			var detailBtn  = hasDetail
+				? '<button class="btn btn-xs btn-default nfs-log-detail-btn" data-entry="' + encodeURIComponent(JSON.stringify(e)) + '">View</button>'
+				: ''
+			var rowClass   = e.result === 'failed' ? ' class="nfs-log-row-err"' : ''
+			return '<tr' + rowClass + '>' +
+				'<td style="color:#777">' + e.ts + '</td>' +
+				'<td><span class="nfs-log-badge ' + badgeClass + '">' + badgeLabel + '</span></td>' +
+				'<td style="text-align:center">' + resultHtml + '</td>' +
+				'<td>' + clientIp + '</td>' +
+				'<td>' + serverPath + '</td>' +
+				'<td>' + dur + '</td>' +
+				'<td>' + detailBtn + '</td>' +
+			'</tr>'
+		},
+
+		_logBadgeClass: function (event) {
+			if (event === 'mount')      return 'mount'
+			if (event === 'umount')     return 'umount'
+			if (event === 'connection') return 'connection'
+			if (event.indexOf('share') === 0)  return 'share'
+			if (event.indexOf('mount_') === 0) return 'mount_cfg'
+			if (event === 'server_admin')      return 'admin'
+			if (event === 'auto_mount')        return 'auto'
+			return 'exports'
+		},
+
+		_logLabel: function (event) {
+			var labels = {
+				mount:'Mount', umount:'Umount',
+				connection:'Conn',
+				share_create:'Share+', share_modify:'Share~', share_delete:'Share-',
+				mount_create:'Mnt cfg+', mount_modify:'Mnt cfg~', mount_delete:'Mnt cfg-',
+				server_admin:'Svc admin', auto_mount:'Auto-mnt', exports_reload:'Exports'
+			}
+			return labels[event] || event
+		},
+
+		_logServerPath: function (e) {
+			var parts = []
+			if (e.event === 'connection') {
+				var dir = e.direction === 'incoming' ? '← ' : '→ '
+				var who = e.client || e.filesystem || e.local || ''
+				var path = e.path || ''
+				parts.push('<b>' + dir + '</b>')
+				if (who) parts.push('<span class="nfs-log-ip">' + who + '</span>')
+				if (path) parts.push('<span class="nfs-log-path">' + path + '</span>')
+				if (e.local && e.direction !== 'incoming') parts.push('<span class="nfs-log-path">→ ' + e.local + '</span>')
+				return parts.join(' ') || '<span style="color:#bbb">—</span>'
+			}
+			if (e.server) parts.push('<span class="nfs-log-ip">' + e.server + '</span>')
+			if (e.path)   parts.push('<span class="nfs-log-path" title="' + e.path + '">' + e.path + '</span>')
+			if (e.local)  parts.push('<span class="nfs-log-path" title="' + e.local + '">→ ' + e.local + '</span>')
+			if (e.action) parts.push('<b>' + e.action + '</b> ' + (e.services || ''))
+			if (e.share_name && !e.path) parts.push(e.share_name)
+			if (e.attempted !== undefined) parts.push(e.success + '/' + e.attempted + ' mounted')
+			return parts.join(' ') || '<span style="color:#bbb">—</span>'
+		},
+
+		_showLogDetail: function (e) {
+			var html = '<div style="font-size:13px;line-height:1.8;padding:5px 0">'
+			html += '<table class="table table-bordered" style="font-size:12px">'
+			var fields = [
+				['Time', e.ts], ['Event', e.event], ['Result', e.result],
+				['Client IP', e.client_ip], ['Server', e.server],
+				['Remote path', e.path], ['Local path', e.local],
+				['Duration', e.duration ? e.duration + ' ms' : null],
+				['Direction', e.direction], ['Client', e.client],
+				['Filesystem', e.filesystem], ['FS Type', e.fs_type],
+				['Action', e.action], ['Services', e.services],
+				['Share name', e.share_name], ['Allowed IPs', e.allowed_ips],
+				['Read/Write', e.rw_mode], ['Squash', e.squash],
+				['NFS version', e.vers ? 'NFS-' + e.vers : null],
+				['Attempted', e.attempted !== undefined ? e.attempted : null],
+				['Success', e.success !== undefined ? e.success : null],
+				['Failed', e.failed !== undefined ? e.failed : null],
+			]
+			for (var i = 0; i < fields.length; i++) {
+				if (fields[i][1] === null || fields[i][1] === undefined || fields[i][1] === '') continue
+				html += '<tr><td style="width:130px;font-weight:bold;color:#555">' + fields[i][0] + '</td>'
+					+ '<td style="font-family:monospace">' + String(fields[i][1]).replace(/</g,'&lt;') + '</td></tr>'
+			}
+			if (e.changes && Object.keys(e.changes).length) {
+				html += '<tr><td style="font-weight:bold;color:#555">Changes</td><td><ul style="margin:0;padding-left:18px">'
+				for (var k in e.changes) {
+					if (e.changes.hasOwnProperty(k))
+						html += '<li><b>' + k + '</b>: ' + String(e.changes[k]).replace(/</g,'&lt;') + '</li>'
+				}
+				html += '</ul></td></tr>'
+			}
+			html += '</table>'
+			if (e.msg) {
+				html += '<div style="margin-top:8px"><b>Raw error:</b><pre style="background:#f8f8f8;padding:8px;font-size:11px;border-radius:3px;white-space:pre-wrap">'
+					+ e.msg.replace(/</g,'&lt;') + '</pre></div>'
+			}
+			if (e.issues && e.issues.length) {
+				html += '<div style="margin-top:8px;color:#e67e22"><b>&#9679; Diagnostic:</b><ul style="margin:4px 0;padding-left:20px">'
+				for (var j = 0; j < e.issues.length; j++)
+					html += '<li>' + e.issues[j].replace(/</g,'&lt;') + '</li>'
+				html += '</ul></div>'
+			}
+			if (e.hints && e.hints.length) {
+				html += '<div style="margin-top:6px;color:#27ae60"><b>&#8594; Suggestions:</b><ul style="margin:4px 0;padding-left:20px">'
+				for (var k2 = 0; k2 < e.hints.length; k2++)
+					html += '<li>' + e.hints[k2].replace(/</g,'&lt;') + '</li>'
+				html += '</ul></div>'
+			}
+			html += '</div>'
+			layer.open({
+				type:1, area:'620px',
+				title:'<span class="glyphicon glyphicon-list-alt" style="margin-right:6px"></span>Log Entry Detail — ' + e.ts,
+				btn:['Close'], content:'<div style="padding:15px 20px;max-height:' + Math.floor(window.innerHeight*0.75) + 'px;overflow-y:auto">' + html + '</div>',
+				yes: function(idx){ layer.close(idx) }
+			})
+		},
+
+		_exportLog: function () {
+			var that = this
+			bt_tools.send({ url: that.url + 'get_log', data: {limit:1000} }, function (res) {
+				var blob = new Blob([JSON.stringify(res.list, null, 2)], {type:'application/json'})
+				var a = document.createElement('a')
+				a.href = URL.createObjectURL(blob)
+				a.download = 'nfs_activity_' + new Date().toISOString().slice(0,10) + '.json'
+				a.click()
+			})
+		},
+
+		readerNfsServerStatus: function () {
+			var _that = this
+			var svcs = [
+				{ id: 'nfs-server', label: 'NFS Server',  desc: 'Main file-sharing daemon — exports local directories to NFS clients over the network.' },
+				{ id: 'rpcbind',    label: 'RPC Bind',    desc: 'Port mapper service — registers NFS/mountd/lockd endpoints so clients can discover them.' }
+			]
+			var shell = '<div class="nfs-svc-wrap">'
+				+ '<div class="nfs-svc-row" id="nfsSvcRow"></div>'
+				+ '<div class="nfs-rpc-section" id="nfsRpcSection"><div style="color:#bbb;font-size:12px">Loading RPC registry…</div></div>'
+				+ '</div>'
+
+			bt_tools.send({ url: _that.url + 'get_server_status', data: {} }, function (res) {
+				// ── Service cards ──
+				var cardsHtml = ''
+				for (var i = 0; i < svcs.length; i++) {
+					var svc = svcs[i], up = res[svc.id]
+					cardsHtml += '<div class="nfs-svc-card ' + (up ? 'running' : 'stopped') + '">'
+					cardsHtml +=   '<div class="nfs-svc-head">'
+					cardsHtml +=     '<span class="nfs-svc-dot ' + (up ? 'up' : 'down') + '"></span>'
+					cardsHtml +=     '<span class="nfs-svc-name">' + svc.label + '</span>'
+					cardsHtml +=     '<span class="nfs-svc-badge ' + (up ? 'up' : 'down') + '">' + (up ? 'RUNNING' : 'STOPPED') + '</span>'
+					cardsHtml +=   '</div>'
+					cardsHtml +=   '<div class="nfs-svc-desc">' + svc.desc + '</div>'
+					cardsHtml +=   '<div class="nfs-svc-btns">'
+					if (!up) {
+						cardsHtml += '<button class="nfs-svc-btn act-start"   data-svc="' + svc.id + '" data-act="start">&#9654; Start</button>'
+					} else {
+						cardsHtml += '<button class="nfs-svc-btn act-stop"    data-svc="' + svc.id + '" data-act="stop">&#9632; Stop</button>'
+						cardsHtml += '<button class="nfs-svc-btn act-restart" data-svc="' + svc.id + '" data-act="restart">&#8635; Restart</button>'
+						cardsHtml += '<button class="nfs-svc-btn act-reload"  data-svc="' + svc.id + '" data-act="reload">&#8634; Reload</button>'
+					}
+					cardsHtml +=   '</div>'
+					cardsHtml += '</div>'
+				}
+				$('#nfsSvcRow').html(cardsHtml)
+
+				$('#nfsSvcRow .nfs-svc-btn').on('click', function () {
+					var act = $(this).data('act'), svcId = $(this).data('svc')
+					var label = act.charAt(0).toUpperCase() + act.slice(1)
+					bt.confirm({ title: label + ' ' + svcId, msg: 'Do you want to <b>' + label + '</b> <b>' + svcId + '</b>?' }, function () {
+						bt_tools.send(_that.url + 'server_admin', { status_args: act }, function (r) {
+							bt_tools.msg(r)
+							if (r.status) {
+								$('.tab-body .tab-con .tab-block.on').html(_that.readerNfsServerStatus())
+							}
+						})
+					})
+				})
+
+				// ── RPC Registry ──
+				var list = res.service_list || []
+				var unique = {}, chips = []
+				for (var j = 0; j < list.length; j++) {
+					var s = list[j], key = s.service + s.vers + s.proto + s.port
+					if (!unique[key]) { unique[key] = true; chips.push(s) }
+				}
+				var rpcHtml = '<div class="nfs-rpc-head">'
+				rpcHtml += '<span class="nfs-rpc-title">&#128269; RPC Registry</span>'
+				rpcHtml += '<span class="nfs-rpc-count">' + chips.length + ' endpoints registered</span>'
+				rpcHtml += '<div class="nfs-rpc-filter">'
+				rpcHtml += '<button class="nfs-rpc-fbtn active" data-proto="">All</button>'
+				rpcHtml += '<button class="nfs-rpc-fbtn" data-proto="tcp">TCP</button>'
+				rpcHtml += '<button class="nfs-rpc-fbtn" data-proto="udp">UDP</button>'
+				rpcHtml += '</div></div>'
+				rpcHtml += '<div class="nfs-rpc-chips">'
+				for (var c = 0; c < chips.length; c++) {
+					var ch = chips[c], proto = (ch.proto || '').toLowerCase()
+					var svcLabel = ch.service || ('prog#' + ch.program)
+					rpcHtml += '<span class="nfs-rpc-chip ' + proto + '" data-proto="' + proto + '">'
+					rpcHtml +=   '<span class="proto">' + proto.toUpperCase() + '</span>'
+					rpcHtml +=   '<span class="svcname">' + svcLabel + '</span>'
+					rpcHtml +=   ' v<span>' + ch.vers + '</span>'
+					rpcHtml +=   ' <span class="port">:' + ch.port + '</span>'
+					rpcHtml += '</span>'
+				}
+				rpcHtml += '</div>'
+				$('#nfsRpcSection').html(rpcHtml)
+
+				// Filter buttons
+				$('#nfsRpcSection .nfs-rpc-fbtn').on('click', function () {
+					var proto = $(this).data('proto')
+					$(this).addClass('active').siblings().removeClass('active')
+					if (!proto) {
+						$('#nfsRpcSection .nfs-rpc-chip').show()
+					} else {
+						$('#nfsRpcSection .nfs-rpc-chip').hide()
+						$('#nfsRpcSection .nfs-rpc-chip[data-proto="' + proto + '"]').show()
+					}
+				})
+			}, { verify: false })
+
+			return shell
+		}
+	}
+	new NfsTools()
+</script>
