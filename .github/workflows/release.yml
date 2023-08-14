@@ -62,13 +62,26 @@ jobs:
           echo "Package contents:"
           unzip -l "../nfs_free-${{ steps.vars.outputs.VERSION }}.zip"
 
-      # ── 4. Publish the GitHub release with the zip attached ───────────────
+      # ── 4. Extract release notes from CHANGELOG.md ───────────────────────
+      - name: Extract changelog notes
+        id: notes
+        run: |
+          VER="${{ steps.vars.outputs.VERSION }}"
+          VER="${VER#v}"   # strip leading 'v'  →  v1.2 → 1.2
+          NOTES=$(awk "/^## \[$VER\]/{flag=1; next} /^## \[/{if(flag) exit} flag" CHANGELOG.md)
+          if [ -z "$NOTES" ]; then
+            NOTES="See [CHANGELOG.md](CHANGELOG.md) for details."
+          fi
+          # Write to file to avoid quoting issues with multiline strings
+          echo "$NOTES" > release_notes.md
+
+      # ── 5. Publish the GitHub release with the zip attached ───────────────
       - name: Create GitHub Release
         run: |
           gh release create "${{ steps.vars.outputs.VERSION }}" \
             "nfs_free-${{ steps.vars.outputs.VERSION }}.zip" \
             --title "NFS Free Edition ${{ steps.vars.outputs.VERSION }}" \
-            --generate-notes \
+            --notes-file release_notes.md \
             --latest
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
