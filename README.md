@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="icon.png" width="96" alt="NFS Free Edition"/>
+<img src="icon.png" width="128" alt="NFS Free Edition"/>
 
 # Network File System (NFS) — Free Edition
 

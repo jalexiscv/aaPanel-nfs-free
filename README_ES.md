@@ -127,7 +127,7 @@ sudo yum install -y nfs-utils rpcbind
 ```
 nfs_free/
 ├── info.json              # Metadatos del plugin (nombre, versión, autor)
-├── icon.png               # Ícono 48×48 RGBA
+├── icon.png               # Ícono 512×512 RGBA
 ├── index.html             # Frontend: CSS + HTML + JavaScript
 ├── nfs_free_main.py       # Backend: clase nfs_free_main (32 métodos)
 ├── nfs_free_service       # Wrapper Python para auto_mount() al boot
