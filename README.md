@@ -61,22 +61,7 @@ firewall rules, SysV init service and systemd service activation automatically.
 
 ### Dashboard
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│  🗄  Network File System (NFS)  v1.0         ● nfs-server  UP  │
-│      Free Edition                            ● rpcbind     UP  │
-├───────────┬───────────┬───────────┬──────────────────────────────┤
-│  Shares   │  Mounts   │   Disk    │    I/O                       │
-│    3      │   2 / 4   │   61 %    │  ops/s  r KB/s  w KB/s      │
-│  exports  │  mounted  │  avg NFS  │  12.4    845.2    210.6      │
-├───────────┴───────────┴───────────┴──────────────────────────────┤
-│  Recent Activity                      Quick Actions              │
-│  ✔ mount       /mnt/prod   10:42     [ Fix mountd port ]        │
-│  ✔ share_create /data/web  10:35     [ Restart NFS     ]        │
-│  ✔ mount       /mnt/back   09:11     [ Refresh         ]        │
-│  ✘ mount       /mnt/old    08:50                                 │
-└─────────────────────────────────────────────────────────────────┘
-```
+![NFS Free Edition — Dashboard](assets/Snap-2023-08-29T11:20:00-05:00.png)
 
 ### Shared List
 
