@@ -5,7 +5,7 @@
   "versions": "1.0",
   "checks": "/www/server/panel/plugin/nfs_free",
   "author": "Jose Alexis Correa Valencia (jalexiscv)",
-  "home": "https://github.com/jalexiscv",
+  "home": "https://github.com/jalexiscv/aaPanel-nfs-free/releases",
   "beta": false,
   "force_message": "",
   "free": true,

@@ -1365,6 +1365,23 @@
 				$('#nfsDashBtnService').on('click', function () { $('.bt-w-menu p').eq(3).click() })
 				$('#nfsDashBtnLog').on('click', function () { $('.bt-w-menu p').eq(4).click() })
 				$('#nfsDashBtnRefresh').on('click', function () { that._loadOverview() })
+				// check for updates once per dashboard load (result cached 1 h server-side)
+				bt_tools.send({ url: that.url + 'check_update', data: {} }, function (upd) {
+					if (upd && upd.has_update) {
+						var banner = '<div id="nfsUpdateBanner" style="'
+							+ 'display:flex;align-items:center;gap:10px;'
+							+ 'background:#fff8e1;border:1px solid #ffe082;border-radius:6px;'
+							+ 'padding:10px 16px;margin-bottom:14px;font-size:13px;color:#5d4037">'
+							+ '<span style="font-size:18px">🔔</span>'
+							+ '<span><b>Update available:</b> v' + upd.latest + ' &mdash; you have v' + upd.current + '</span>'
+							+ '<a href="' + upd.release_url + '" target="_blank" '
+							+   'style="margin-left:auto;padding:4px 12px;background:#fb8c00;color:#fff;'
+							+   'border-radius:4px;text-decoration:none;font-weight:600;white-space:nowrap">'
+							+   'View release ↗</a>'
+							+ '</div>'
+						$('#nfsDashboard').prepend(banner)
+					}
+				}, { verify: false })
 			}, { verify: false })
 		},
 

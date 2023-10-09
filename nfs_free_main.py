@@ -28,7 +28,7 @@
 #                  create_mount, modify_mount, remove_mount,
 #                  to_mount, to_umount, auto_mount, set_mount, set_umount
 #    Server      : get_server_status, server_admin, get_overview,
-#                  get_nfsstat, get_nfsiostat
+#                  get_nfsstat, get_nfsiostat, check_update
 #    Connections : get_connections, get_disk_mounts, get_nfs_ports,
 #                  fix_mountd_port
 #    Log         : get_log, clear_log
@@ -1506,6 +1506,62 @@ class nfs_free_main:
             hints.append("Connection refused — ensure nfs-server and rpcbind are running")
 
         return issues, hints
+
+    def check_update(self):
+        """Query GitHub Releases API and compare with the installed version.
+        Result is cached in config/update_cache.json for 1 hour to avoid rate-limiting.
+        """
+        import urllib.request
+        CURRENT    = '1.0'
+        REPO_API   = 'https://api.github.com/repos/jalexiscv/aaPanel-nfs-free/releases/latest'
+        RELEASES   = 'https://github.com/jalexiscv/aaPanel-nfs-free/releases'
+        cache_file = os.path.join(self._config_path, 'update_cache.json')
+
+        # Return cached data if it is less than 1 hour old
+        if os.path.exists(cache_file):
+            try:
+                cached = json.loads(open(cache_file).read())
+                if time.time() - cached.get('ts', 0) < 3600:
+                    cached['current'] = CURRENT
+                    return cached
+            except Exception:
+                pass
+
+        try:
+            req = urllib.request.Request(
+                REPO_API,
+                headers={'User-Agent': 'nfs_free-plugin/' + CURRENT, 'Accept': 'application/vnd.github+json'}
+            )
+            with urllib.request.urlopen(req, timeout=5) as r:
+                data = json.loads(r.read().decode())
+            latest = data.get('tag_name', '').lstrip('v')
+            result = {
+                'status':       True,
+                'current':      CURRENT,
+                'latest':       latest,
+                'has_update':   latest != CURRENT and latest != '',
+                'release_url':  data.get('html_url', RELEASES),
+                'release_name': data.get('name', latest),
+                'ts':           time.time(),
+            }
+        except Exception as e:
+            result = {
+                'status':      False,
+                'current':     CURRENT,
+                'latest':      None,
+                'has_update':  False,
+                'release_url': RELEASES,
+                'msg':         str(e),
+                'ts':          time.time(),
+            }
+
+        try:
+            with open(cache_file, 'w') as f:
+                json.dump(result, f)
+        except Exception:
+            pass
+
+        return result
 
     def __get_mod(self):
         return {'name': 'nfs_free', 'version': '1.0', 'author': 'Jose Alexis Correa Valencia'}
