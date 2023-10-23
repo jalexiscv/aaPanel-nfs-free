@@ -9,6 +9,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+#### Backend — `nfs_free_main.py`
+- `check_update` — queries the GitHub Releases API (`/repos/jalexiscv/aaPanel-nfs-free/releases/latest`) to compare the installed version against the latest published release; result cached for 1 hour in `config/update_cache.json` to respect GitHub's unauthenticated rate limit
+
+#### Frontend — `index.html`
+- Update banner in the Overview tab: shown automatically when `check_update` reports a newer version; displays current vs. latest version numbers and a direct link to the GitHub release page
+
+#### Repository infrastructure
+- `info.json` — `home` field updated to point to the GitHub Releases page instead of the author profile
+- `.gitignore` — added `.claude/` to prevent session data from being committed
+- `assets/` — real UI screenshots added for all five plugin tabs (Overview, Shared list, Mount list, Service status, Activity log)
+- `README.md` — ASCII UI mockups replaced with actual screenshots; plugin icon updated to a server-rack and network-tree design at 512×512 px; icon display size bumped to 128 px in the banner
+- `README_*.md` — icon dimension annotation corrected from 48×48 to 512×512 in all six language files
+- `.github/workflows/release.yml` — release step now extracts the matching `## [x.y]` section from `CHANGELOG.md` via `awk` and passes it as `--notes-file` instead of using `--generate-notes`
+
 ---
 
 ## [1.0] - 2023-07-31
