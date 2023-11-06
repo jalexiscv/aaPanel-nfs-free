@@ -12,7 +12,7 @@ and diagnose mount failures — all from a graphical panel interface.
 <br/>
 
 [![License](https://img.shields.io/github/license/jalexiscv/aaPanel-nfs-free?color=blue&style=flat-square)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.0-brightgreen?style=flat-square)](https://github.com/jalexiscv/aaPanel-nfs-free/releases)
+[![Version](https://img.shields.io/badge/version-1.1-brightgreen?style=flat-square)](https://github.com/jalexiscv/aaPanel-nfs-free/releases)
 [![Python](https://img.shields.io/badge/python-3.6%2B-3776ab?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
 [![Platform](https://img.shields.io/badge/platform-Linux-FCC624?style=flat-square&logo=linux&logoColor=black)](https://github.com/jalexiscv/aaPanel-nfs-free)
 [![aaPanel](https://img.shields.io/badge/aaPanel-plugin-4A90D9?style=flat-square)](https://www.aapanel.com/)

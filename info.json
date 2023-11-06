@@ -2,7 +2,7 @@
   "title": "Network File System (NFS)",
   "name": "nfs_free",
   "ps": "Share directories via NFS and mount remote NFS shares. Create NFS exports, manage mounts with full protocol options (NFSv3/v4, TCP/UDP, rsize/wsize tuning), auto-mount at boot, and monitor NFS server status.",
-  "versions": "1.0",
+  "versions": "1.1",
   "checks": "/www/server/panel/plugin/nfs_free",
   "author": "Jose Alexis Correa Valencia (jalexiscv)",
   "home": "https://github.com/jalexiscv/aaPanel-nfs-free/releases",

@@ -51,7 +51,7 @@ PANEL_PATH = '/www/server/panel'
 PLUGIN_PATH = PANEL_PATH + '/plugin/nfs_free'
 
 class nfs_free_main:
-    """Network File System (NFS) Manager v1.0 — Free Edition
+    """Network File System (NFS) Manager v1.1 — Free Edition
     File sharing based on NFS service.
     Features: share creation, remote mount, auto-mount at boot, server monitoring.
     """
@@ -1512,7 +1512,7 @@ class nfs_free_main:
         Result is cached in config/update_cache.json for 1 hour to avoid rate-limiting.
         """
         import urllib.request
-        CURRENT    = '1.0'
+        CURRENT    = '1.1'
         REPO_API   = 'https://api.github.com/repos/jalexiscv/aaPanel-nfs-free/releases/latest'
         RELEASES   = 'https://github.com/jalexiscv/aaPanel-nfs-free/releases'
         cache_file = os.path.join(self._config_path, 'update_cache.json')
@@ -1564,4 +1564,4 @@ class nfs_free_main:
         return result
 
     def __get_mod(self):
-        return {'name': 'nfs_free', 'version': '1.0', 'author': 'Jose Alexis Correa Valencia'}
+        return {'name': 'nfs_free', 'version': '1.1', 'author': 'Jose Alexis Correa Valencia'}
