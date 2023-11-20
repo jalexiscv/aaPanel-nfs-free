@@ -37,7 +37,7 @@
 #  Email       : jalexiscv@gmail.com
 #  GitHub      : https://github.com/jalexiscv
 #  LinkedIn    : https://www.linkedin.com/in/jalexiscv/
-#  Version     : 1.0
+#  Version     : 1.1
 #  License     : MIT — Free Software
 #  Date        : July 3, 2023
 #  Copyright   : © 2023 Jose Alexis Correa Valencia
