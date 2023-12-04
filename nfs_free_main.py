@@ -57,6 +57,13 @@ class nfs_free_main:
     """
 
     def __init__(self):
+        """Initialise paths and ensure daemon ports are pinned.
+
+        Sets up the four file paths used throughout the plugin (config dir,
+        share JSON, mount JSON, activity log) and calls _ensure_mountd_port so
+        that mountd/lockd/statd are always on their fixed ports from the first
+        request onward.
+        """
         self._config_path = os.path.join(PLUGIN_PATH, 'config')
         self._share_file = os.path.join(self._config_path, 'share.json')
         self._mount_file = os.path.join(self._config_path, 'mount.json')
