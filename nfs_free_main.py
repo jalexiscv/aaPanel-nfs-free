@@ -76,8 +76,15 @@ class nfs_free_main:
     # ════════════════════════════════════════════════════════════
 
     def _ensure_mountd_port(self):
-        """Auto-fix mountd port on plugin load if not configured.
-        Runs silently - only writes if /etc/nfs.conf lacks port 20048."""
+        """Pin mountd, lockd and statd to fixed ports on first load.
+
+        Writes /etc/nfs.conf only when mountd is not already set to 20048.
+        Also pins lockd to 32874 (TCP+UDP) and statd to 32876 so all three
+        NFS helper daemons use predictable ports that can be whitelisted in a
+        firewall without dynamic port ranges.  Restarts nfs-server and rpcbind
+        after writing.  Any exception is silently swallowed to avoid blocking
+        the panel request that triggered __init__.
+        """
         import configparser
         nfs_conf = "/etc/nfs.conf"
         try:
