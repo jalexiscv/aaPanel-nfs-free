@@ -187,10 +187,7 @@ class nfs_free_main:
         return []
 
     def save_share_config(self, shares):
-        """Save share configuration to JSON file.
-        @param shares<list> List of share dicts
-        @return void
-        """
+        """Persist share configuration to disk (config/share.json)."""
         os.makedirs(self._config_path, exist_ok=True)
         with open(self._share_file, 'w') as f:
             json.dump(shares, f, indent=2)
