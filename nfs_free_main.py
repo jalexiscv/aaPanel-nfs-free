@@ -210,10 +210,7 @@ class nfs_free_main:
         return []
 
     def save_mount_config(self, mounts):
-        """Save mount configuration to JSON file.
-        @param mounts<list> List of mount dicts
-        @return void
-        """
+        """Persist mount configuration to disk (config/mount.json)."""
         os.makedirs(self._config_path, exist_ok=True)
         with open(self._mount_file, 'w') as f:
             json.dump(mounts, f, indent=2)
