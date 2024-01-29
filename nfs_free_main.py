@@ -220,9 +220,12 @@ class nfs_free_main:
     # ════════════════════════════════════════════════════════════
 
     def get_share_list(self, get=None):
-        """List all configured NFS shares.
-        @param get<dict_obj> Optional filter parameters
-        @return dict {list: [...]}
+        """Return all configured NFS shares plus the required firewall ports.
+
+        Returns a dict with two keys:
+          list  — array of share dicts from config/share.json
+          ports — string listing the ports that must be open on the server
+                  firewall for NFS to work ('111/2049/20048/32874-65535')
         """
         shares = self.get_share_config()
         for s in shares:
