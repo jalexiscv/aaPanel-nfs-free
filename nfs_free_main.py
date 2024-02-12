@@ -761,9 +761,10 @@ class nfs_free_main:
         return self.to_umount(self._to_dict(get))
 
     def write_mount_conf(self, get=None):
-        """Write mount configuration for boot persistence.
-        Auto-mount entries are managed via the plugin config JSON
-        and applied by the auto_mount service at boot.
+        """No-op stub kept for API compatibility.
+
+        Boot persistence is handled entirely by auto_mount(), which reads
+        config/mount.json at startup — no separate conf file is required.
         """
         pass
 
