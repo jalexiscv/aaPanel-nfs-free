@@ -1175,8 +1175,11 @@ class nfs_free_main:
         return result
 
     def get_nfsiostat(self, get=None):
-        """Get NFS I/O statistics (nfsiostat).
-        @return list of {line} dicts
+        """Return raw nfsiostat output as a list of line strings for the frontend.
+
+        This is the public API endpoint consumed by the Service status tab to
+        render the raw nfsiostat text.  For structured per-mount metrics used
+        internally by get_mount_list and get_overview, see _parse_nfsiostat().
         """
         ok, out = self.exec_shell("nfsiostat 2>/dev/null")
         if not ok:
