@@ -1187,7 +1187,7 @@ class nfs_free_main:
         return [{'line': l.strip()} for l in out.split('\n') if l.strip()]
 
     # ════════════════════════════════════════════════════════════
-    # INTERNAL
+    # PORT CONFIGURATION
     # ════════════════════════════════════════════════════════════
 
     def get_nfs_ports(self, get=None):
@@ -1233,6 +1233,10 @@ class nfs_free_main:
             return {'status': True, 'msg': 'mountd port fixed to 20048. Restart firewall plugin to allow ports.'}
         except Exception as e:
             return {'status': False, 'msg': f'Failed to configure mountd port: {e}'}
+
+    # ════════════════════════════════════════════════════════════
+    # INTERNAL HELPERS
+    # ════════════════════════════════════════════════════════════
 
     def _reload_exports(self):
         """Reload NFS exports configuration (exportfs -ra)."""
