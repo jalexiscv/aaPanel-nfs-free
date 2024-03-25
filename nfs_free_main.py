@@ -1528,7 +1528,18 @@ class nfs_free_main:
 
     def check_update(self):
         """Query GitHub Releases API and compare with the installed version.
-        Result is cached in config/update_cache.json for 1 hour to avoid rate-limiting.
+
+        The result is cached in config/update_cache.json for 1 hour to stay
+        within GitHub's unauthenticated rate limit (60 req/h per IP).
+
+        Returns a dict with the following keys:
+          status       — True if the API call succeeded, False on network error
+          current      — installed version string (e.g. '1.1')
+          latest       — latest published version from GitHub, or None on error
+          has_update   — True when latest != current and latest is not empty
+          release_url  — URL of the latest GitHub release page
+          release_name — human-readable release title from GitHub
+          msg          — error message (only present when status is False)
         """
         import urllib.request
         CURRENT    = '1.1'
