@@ -1594,4 +1594,9 @@ class nfs_free_main:
         return result
 
     def __get_mod(self):
+        """Return basic plugin identity metadata.
+
+        Unused internally — kept as a named-mangled stub in case a future
+        aaPanel version queries it via introspection.
+        """
         return {'name': 'nfs_free', 'version': '1.1', 'author': 'Jose Alexis Correa Valencia'}
