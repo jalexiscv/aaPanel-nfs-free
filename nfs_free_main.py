@@ -111,10 +111,10 @@ class nfs_free_main:
             pass
 
     def exec_shell(self, cmdstring, timeout=60):
-        """Execute a shell command safely.
-        @param cmdstring<string> Shell command to execute
-        @param timeout<int> Maximum execution time in seconds
-        @return tuple (success<bool>, output<str>)
+        """Execute a shell command and return (success, output).
+
+        success is True when the exit code is 0.  output combines stdout and
+        stderr, stripped of leading/trailing whitespace.
         """
         try:
             result = subprocess.run(
@@ -128,11 +128,7 @@ class nfs_free_main:
             return (False, str(e))
 
     def exists_args(self, get, *args):
-        """Verify required parameters exist in the request.
-        @param get<dict_obj> Request parameters
-        @param args<string> Required parameter names
-        @return bool
-        """
+        """Return True only if every name in args is a non-empty key in get."""
         d = self._to_dict(get)
         if d is None:
             return False
@@ -156,10 +152,7 @@ class nfs_free_main:
             return None
 
     def get_user_id(self, username='nfsnobody'):
-        """Get UID/GID for a system user, falling back through nfsnobody/nobody/65534.
-        @param username<string> Preferred username to look up
-        @return tuple (uid<int>, gid<int>)
-        """
+        """Return (uid, gid) for username, falling back to nobody then 65534."""
         import pwd
         for name in (username, 'nfsnobody', 'nobody'):
             try:
@@ -174,9 +167,7 @@ class nfs_free_main:
     # ════════════════════════════════════════════════════════════
 
     def get_share_config(self):
-        """Read share configuration from JSON file.
-        @return list of share dictionaries
-        """
+        """Read and return the share list from config/share.json ([] on error)."""
         try:
             if os.path.exists(self._share_file):
                 with open(self._share_file, 'r') as f:
@@ -197,9 +188,7 @@ class nfs_free_main:
     # ════════════════════════════════════════════════════════════
 
     def get_mount_config(self):
-        """Read mount configuration from JSON file.
-        @return list of mount dictionaries
-        """
+        """Read and return the mount list from config/mount.json ([] on error)."""
         try:
             if os.path.exists(self._mount_file):
                 with open(self._mount_file, 'r') as f:
@@ -234,9 +223,10 @@ class nfs_free_main:
         return {'list': shares, 'ports': '111/2049/20048/32874-65535'}
 
     def get_share_find(self, get=None):
-        """Find a specific share by name.
-        @param get<string|dict> Share name or request dict with share_name key
-        @return dict Share info or empty dict
+        """Return the share dict for share_name, or {} if not found.
+
+        get may be a bare string (the share name) or a request dict with a
+        share_name key.
         """
         if isinstance(get, str):
             share_name = get
@@ -251,11 +241,13 @@ class nfs_free_main:
         return {}
 
     def create_share(self, get):
-        """Create a new NFS directory share (export).
-        Required: share_name, nfs_path
-        Optional: rw_mode (rw|ro), sync_mode (sync|async), squash (all_squash|no_root_squash|no_all_squash|root_squash)
-        @param get<dict_obj> Share parameters
-        @return dict {status<bool>, msg<string>}
+        """Create a new NFS export and reload /etc/exports.
+
+        Required fields: share_name, path (or nfs_path).
+        Optional: rw_mode (rw|ro), sync_mode (sync|async),
+                  squash (all_squash|root_squash|no_root_squash|no_all_squash),
+                  limit_address (IP/CIDR), user, ps.
+        Returns {status, msg}.
         """
         d = self._to_dict(get)
         if not d:
@@ -295,9 +287,10 @@ class nfs_free_main:
         return {'status': True, 'msg': f'Share created successfully: {share_name}'}
 
     def modify_share(self, get):
-        """Modify an existing NFS share.
-        @param get<dict_obj> Share parameters (share_name required)
-        @return dict {status<bool>, msg<string>}
+        """Update fields of an existing share and reload /etc/exports.
+
+        share_name is required; only supplied fields are updated.
+        Returns {status, msg}.
         """
         d = self._to_dict(get)
         if not d:
@@ -333,9 +326,10 @@ class nfs_free_main:
         return {'status': True, 'msg': f'Share modified successfully: {share_name}'}
 
     def remove_share(self, get=None):
-        """Delete an NFS share.
-        @param get<dict_obj> Request with share_name
-        @return dict {status, msg}
+        """Remove a share from config and reload /etc/exports.
+
+        get may be a bare string (share name) or a request dict with share_name.
+        Returns {status, msg}.
         """
         if isinstance(get, str):
             share_name = get
@@ -358,8 +352,9 @@ class nfs_free_main:
         return {'status': True, 'msg': f'Delete NFS directory share: {name}'}
 
     def _write_exports(self, shares):
-        """Write /etc/exports from share configuration.
-        @param shares<list> Share configurations
+        """Rebuild /etc/exports from the given share list.
+
+        Writes an empty file when shares is empty so stale exports are cleared.
         """
         lines = []
         for s in shares:
@@ -382,9 +377,11 @@ class nfs_free_main:
                 f.write('')
 
     def show_ip_share_list(self, get=None):
-        """Show NFS shares available on a remote server via showmount.
-        @param get<string|dict> Server address or request dict with server_address key
-        @return list of {path: ...}
+        """Return the export paths advertised by a remote NFS server.
+
+        Queries the server via showmount -e.  get may be a bare IP/hostname
+        string or a request dict with a server_address key.
+        Returns a list of {path: ...} dicts, or [] on failure.
         """
         if isinstance(get, str):
             server_address = get
@@ -410,10 +407,13 @@ class nfs_free_main:
     # ════════════════════════════════════════════════════════════
 
     def get_mount_list(self, get=None):
-        """List configured NFS mounts enriched with live mount_info + iostat.
-        Also detects mounts active in the kernel but absent from config (untracked),
-        and logs any connection changes since last call.
-        @return dict {list: [...]}
+        """Return configured mounts enriched with live kernel state and I/O metrics.
+
+        Each entry gains mount_info (from /proc/mounts, None if not mounted) and
+        iostat (from nfsiostat, None if not mounted).  Mounts active in the
+        kernel but absent from config are appended with _untracked=True.
+        Connection changes since the last call are written to the activity log.
+        Returns {list: [...]}.
         """
         active = self._get_active_mounts()       # mount_path → mount_info dict
         iostat = self._parse_nfsiostat()         # mount_path → iostat dict
@@ -444,9 +444,9 @@ class nfs_free_main:
         return {'list': mounts}
 
     def get_mount_find(self, get=None):
-        """Find mounts by name.
-        @param get<string|dict> Mount name or request dict with mount_name key
-        @return list of mount dicts
+        """Return mount dicts matching mount_name, or all mounts if name is empty.
+
+        get may be a bare string (mount name) or a request dict with mount_name.
         """
         if isinstance(get, str):
             mount_name = get
@@ -458,9 +458,9 @@ class nfs_free_main:
         return [m for m in self.get_mount_config() if m.get('mount_name') == mount_name]
 
     def get_mount(self, get=None):
-        """Get mount info by local path.
-        @param get<string|dict> Mount path or request dict with mount_path key
-        @return dict Mount info or empty dict
+        """Return the mount config dict for the given local path, or {}.
+
+        get may be a bare path string or a request dict with mount_path.
         """
         if isinstance(get, str):
             mount_path = get
@@ -475,10 +475,11 @@ class nfs_free_main:
         return {}
 
     def get_mount_cmd(self, info):
-        """Build NFS mount command from configuration.
-        Generates: mount -t nfs -o tcp,rw,hard,rsize=... server:remote local
-        @param info<dict> Mount configuration
-        @return string Mount command
+        """Build the mount command string from a mount configuration dict.
+
+        Produces: mount -t nfs -o <opts> server:/remote /local
+        Numeric options (rsize, wsize, timeo, retrans, vers) are included only
+        when present and non-empty in info.
         """
         server = info.get('server_address', '')
         remote = info.get('nfs_path', '')
@@ -505,11 +506,12 @@ class nfs_free_main:
         return f"mount -t nfs -o {','.join(opts)} {server}:{remote} {local}"
 
     def create_mount(self, get):
-        """Create a new NFS mount configuration.
-        Required: mount_name, server_address, nfs_path, mount_path
-        Optional: proto, rw_mode, sync_mode, hard, retrans, rsize, wsize, timeo, vers, noresvport, auto_mount
-        @param get<dict_obj> Mount parameters
-        @return dict {status<bool>, msg<string>}
+        """Save a new NFS mount entry and create the local mount directory.
+
+        Required fields: mount_name, server_address, nfs_path, mount_path.
+        Optional: proto, rw_mode, sync_mode, hard, retrans, rsize, wsize,
+                  timeo, vers, noresvport, auto_mount (0|1), ps.
+        Returns {status, msg}.
         """
         d = self._to_dict(get)
         if not d:
@@ -556,9 +558,10 @@ class nfs_free_main:
         return {'status': True, 'msg': f'Mount configuration created: {name}'}
 
     def modify_mount(self, get):
-        """Modify an existing NFS mount configuration.
-        @param get<dict_obj> Mount parameters (mount_name required)
-        @return dict {status<bool>, msg<string>}
+        """Update fields of an existing mount configuration.
+
+        mount_name is required; only supplied fields are overwritten.
+        Returns {status, msg}.
         """
         d = self._to_dict(get)
         if not d:
@@ -601,9 +604,11 @@ class nfs_free_main:
         return {'status': True, 'msg': f'Mount configuration modified: {name}'}
 
     def remove_mount(self, get=None):
-        """Delete an NFS mount configuration.
-        @param get<string|dict> Mount name or request dict with mount_name key
-        @return dict {status, msg}
+        """Unmount and delete a mount configuration.
+
+        Attempts umount before removing the config entry.
+        get may be a bare string (mount name) or a request dict with mount_name.
+        Returns {status, msg}.
         """
         if isinstance(get, str):
             mount_name = get
@@ -628,10 +633,12 @@ class nfs_free_main:
         return {'status': True, 'msg': f'Delete NFS mount configuration: {name}'}
 
     def to_mount(self, get=None):
-        """Mount an NFS share by mount_name or full config.
-        Frontend sends {mount_name: ...}, backend looks up full config.
-        @param get<dict_obj> {mount_name: string} or full mount config
-        @return dict {status<bool>, msg<string>}
+        """Execute the mount command for a configured NFS mount.
+
+        get may contain just {mount_name} (config is looked up) or a full
+        mount config dict.  On failure, _diagnose_mount_failure is called and
+        its issues/hints are included in the response.
+        Returns {status, msg} on success, {status, msg, issues, hints} on failure.
         """
         d = self._to_dict(get)
         if not d:
@@ -691,9 +698,10 @@ class nfs_free_main:
         return {'status': False, 'msg': '\n'.join(lines), 'issues': issues, 'hints': hints}
 
     def to_umount(self, get=None):
-        """Unmount an NFS share by mount_name or full config.
-        @param get<dict_obj> {mount_name: string} or full mount config
-        @return dict {status<bool>, msg<string>}
+        """Execute umount -fl for an active NFS mount path.
+
+        get may contain just {mount_name} (config is looked up) or a full
+        mount config dict.  Returns {status, msg}.
         """
         d = self._to_dict(get)
         if not d:
@@ -726,19 +734,17 @@ class nfs_free_main:
             return {'status': False, 'msg': f'Umount failed: {out}'}
 
     def is_exists_mount_path(self, mount_path=None):
-        """Check if a path is currently mounted.
-        @param mount_path<string> Path to check
-        @return bool True if mounted
-        """
+        """Return True if mount_path is an active mountpoint (via mountpoint -q)."""
         if not mount_path:
             return False
         ok, _ = self.exec_shell(f"mountpoint -q {mount_path}")
         return ok
 
     def auto_mount(self, get=None):
-        """Auto-mount all configured shares with auto_mount=1.
-        Called at system boot by the nfs_free service.
-        @return dict {status, msg}
+        """Mount all entries with auto_mount=1 that are not already mounted.
+
+        Called at system boot by the nfs_free_service bootstrap.
+        Returns {status, msg} with a success/failure count summary.
         """
         count = 0
         success = 0
@@ -927,8 +933,10 @@ class nfs_free_main:
             pass
 
     def get_connections(self, get=None):
-        """Return current NFS connections: outgoing mounts and incoming clients.
-        @return dict {outgoing: [...], incoming: [...]}
+        """Return active outgoing mounts and incoming NFS clients.
+
+        outgoing is read from /proc/mounts; incoming from showmount -a.
+        Returns {outgoing: [...], incoming: [...]}.
         """
         active = self._get_active_mounts()
         outgoing = []
@@ -956,9 +964,10 @@ class nfs_free_main:
         return {'outgoing': outgoing, 'incoming': incoming}
 
     def get_disk_mounts(self, get=None):
-        """List all active NFS mounts on the system.
-        Reads /proc/mounts for NFS filesystems.
-        @return list of {device, mount_point, fs_type, options}
+        """List all NFS mounts currently active in the kernel.
+
+        Reads /proc/mounts and returns entries where fs_type is nfs or nfs4.
+        Each dict has keys: device, mount_point, fs_type, options.
         """
         result = []
         try:
@@ -981,8 +990,14 @@ class nfs_free_main:
     # ════════════════════════════════════════════════════════════
 
     def get_overview(self, get=None):
-        """Return all data needed by the Dashboard panel in one call.
-        @return dict with keys: server, shares, mounts, io, recent_log
+        """Aggregate all data needed by the Dashboard in a single call.
+
+        Returns a dict with keys:
+          server     — {nfs-server: bool, rpcbind: bool}
+          shares     — {total: int, list: [...up to 4...]}
+          mounts     — {configured, mounted, untracked, avg_disk}
+          io         — {ops, read_kbs, write_kbs} totals across all active mounts
+          recent_log — last 8 activity log entries
         """
         # Server health
         server = {}
@@ -1050,8 +1065,10 @@ class nfs_free_main:
         }
 
     def get_server_status(self, get=None):
-        """Get NFS server and rpcbind service status plus registered RPC services.
-        @return dict {nfs-server<bool>, rpcbind<bool>, service_list<list>}
+        """Return service health and registered RPC endpoints.
+
+        Checks nfs-server and rpcbind via systemctl is-active, then parses
+        rpcinfo -p into a service_list of {program, vers, proto, port, service}.
         """
         result = {}
         for svc in ('nfs-server', 'rpcbind'):
@@ -1075,9 +1092,10 @@ class nfs_free_main:
         return result
 
     def server_admin(self, get):
-        """Manage NFS services (start/stop/restart/reload).
-        @param get<dict_obj> {status_args: reload|stop|start|restart}
-        @return dict {status<bool>, msg<string>}
+        """Start, stop, restart or reload nfs-server and rpcbind.
+
+        get must contain status_args with one of: start, stop, restart, reload.
+        Returns {status, msg}.
         """
         d = self._to_dict(get)
         if not d:
@@ -1094,8 +1112,13 @@ class nfs_free_main:
         return {'status': True, 'msg': f'NFS and RPCBIND services {act}ed successfully'}
 
     def get_nfsstat(self, get=None):
-        """Get NFS protocol statistics structured by category from /proc/net/rpc.
-        @return dict {nfs_v3_server, nfs_v3_client, nfs_v4_server, nfs_v4_servop, nfs_v4_client}
+        """Parse NFS protocol counters from /proc/net/rpc into structured dicts.
+
+        Returns a dict that may contain any of:
+          nfs_v3_server, nfs_v3_client — NFSv3 operation counts (proc3 lines)
+          nfs_v4_server                — NFSv4 compound call counts (proc4 line)
+          nfs_v4_servop, nfs_v4_client — per-operation counts (proc4ops lines)
+        Missing source files are silently skipped; missing counters default to 0.
         """
         v3_names = [
             'null', 'getattr', 'setattr', 'lookup', 'access', 'readlink',
@@ -1191,8 +1214,9 @@ class nfs_free_main:
     # ════════════════════════════════════════════════════════════
 
     def get_nfs_ports(self, get=None):
-        """Return required NFS firewall ports for inter-plugin communication.
-        @return dict {ports: string, mountd_port: int}
+        """Return the fixed port numbers required on the server firewall.
+
+        Keys: ports (string summary), mountd_port, rpcbind_port, nfs_port.
         """
         return {
             'ports': '111/2049/20048/32874-65535',
@@ -1202,9 +1226,10 @@ class nfs_free_main:
         }
 
     def fix_mountd_port(self, get=None):
-        """Configure mountd to use fixed port 20048 for cross-firewall compatibility.
-        Writes /etc/nfs.conf if needed, then restarts nfs-server.
-        @return dict {status, msg}
+        """Pin mountd to port 20048 in /etc/nfs.conf and restart services.
+
+        Also pins lockd (32874) and statd (32876) in the same write.  No-op
+        if 20048 is already configured.  Returns {status, msg}.
         """
         import configparser
         nfs_conf = '/etc/nfs.conf'
@@ -1248,10 +1273,12 @@ class nfs_free_main:
     # ════════════════════════════════════════════════════════════
 
     def _log(self, event, result, **data):
-        """Append one activity entry to the log file (thread-safe, max 1000 entries).
-        @param event<str>   Event type key (mount, umount, share_create, …)
-        @param result<str>  'success' or 'failed'
-        @param data         Any extra fields to include in the entry
+        """Append one structured entry to the activity log (thread-safe, max 1000).
+
+        event is the operation key (mount, umount, share_create, …).
+        result is 'success', 'failed', 'connected', or 'disconnected'.
+        Extra keyword arguments are merged into the entry dict.
+        Uses fcntl.LOCK_EX so concurrent panel requests do not corrupt the file.
         """
         entry = {
             'id':     uuid.uuid4().hex[:8],
@@ -1277,9 +1304,11 @@ class nfs_free_main:
             pass
 
     def get_log(self, get=None):
-        """Return activity log entries with optional filters.
-        Params: event, result, ip, limit (default 200)
-        @return dict {list, total}
+        """Return filtered activity log entries.
+
+        Accepted filter keys in get: event, result, ip, limit (default 200, max 1000).
+        ip is matched against client_ip and server fields.
+        Returns {list: [...], total: int} where total is the count after filtering.
         """
         d = self._to_dict(get) or {}
         limit       = min(int(d.get('limit', 200)), 1000)
@@ -1304,9 +1333,7 @@ class nfs_free_main:
         return {'list': logs[:limit], 'total': len(logs)}
 
     def clear_log(self, get=None):
-        """Clear all activity log entries.
-        @return dict {status, msg}
-        """
+        """Truncate the activity log to an empty array.  Returns {status, msg}."""
         try:
             with open(self._log_file, 'w') as f:
                 json.dump([], f)
@@ -1319,8 +1346,10 @@ class nfs_free_main:
     # ════════════════════════════════════════════════════════════
 
     def _check_port(self, host, port, timeout=3):
-        """Test TCP connectivity to host:port using bash /dev/tcp.
-        @return bool True if port is reachable
+        """Return True if host:port accepts a TCP connection within timeout seconds.
+
+        Uses bash /dev/tcp rather than Python sockets to reuse the existing
+        shell execution path without additional imports.
         """
         ok, _ = self.exec_shell(
             f"timeout {timeout} bash -c 'echo >/dev/tcp/{host}/{port}' 2>/dev/null",
@@ -1329,8 +1358,10 @@ class nfs_free_main:
         return ok
 
     def _get_client_ip_towards(self, server):
-        """Detect the local IP used to reach the given server.
-        @return string IP address or empty string
+        """Return the local source IP that the kernel would use to reach server.
+
+        Parses the 'src' field from 'ip route get <server>'.
+        Returns an empty string if the route cannot be determined.
         """
         ok, out = self.exec_shell(
             f"ip route get {server} 2>/dev/null | grep -oE 'src [0-9.]+' | awk '{{print $2}}'"
@@ -1338,10 +1369,11 @@ class nfs_free_main:
         return out.strip() if ok else ''
 
     def _parse_showmount_clients(self, showmount_output, target_path):
-        """Parse showmount -e output and return the allowed client specs for target_path.
-        @return list of specs (e.g. ['192.168.0.0/24', '10.0.0.1'])
-                ['*'] if everyone is allowed
-                None  if the path is not exported at all
+        """Extract allowed client specs for target_path from showmount -e output.
+
+        Returns a list of spec strings (e.g. ['192.168.0.0/24', '10.0.0.1']),
+        ['*'] if the export is open to everyone, or None if the path is not
+        in the export list at all.
         """
         import re
         for line in showmount_output.strip().split('\n'):
@@ -1361,9 +1393,10 @@ class nfs_free_main:
         return None
 
     def _ip_matches_export_spec(self, client_ip, spec):
-        """Check if client_ip matches an NFS export client specification.
-        Handles: *, IP address, CIDR (192.168.0.0/24), netmask (192.168.0.0/255.255.255.0).
-        @return bool
+        """Return True if client_ip is permitted by the given NFS export spec.
+
+        Handles: '*' wildcard, exact IP, CIDR (192.168.0.0/24), and
+        netmask notation (192.168.0.0/255.255.255.0).
         """
         import ipaddress
         if spec in ('*', '(everyone)', '(all machines)'):
@@ -1375,11 +1408,12 @@ class nfs_free_main:
 
     def _diagnose_mount_failure(self, info, raw_error=''):
         """Run step-by-step diagnostics when an NFS mount fails.
+
         Uses showmount output and CIDR matching to identify exactly which
         client IP is rejected and what the server actually allows.
-        @param info<dict>       Full mount configuration
-        @param raw_error<str>   Raw error string from the mount command
-        @return tuple (issues<list[str]>, hints<list[str]>)
+        info is the full mount configuration dict; raw_error is the stderr
+        string from the failed mount command.
+        Returns (issues, hints) — both are lists of human-readable strings.
         """
         server = info.get('server_address', '')
         remote_path = info.get('nfs_path', '')
