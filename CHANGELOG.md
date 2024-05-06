@@ -9,6 +9,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+#### Documentation — `nfs_free_main.py`
+- File header version corrected from `1.0` to `1.1`
+- `__init__` — added missing docstring describing the four file paths it initialises and why `_ensure_mountd_port` is called at construction time
+- `_ensure_mountd_port` — expanded docstring to cover all three daemons it pins (mountd 20048, lockd 32874, statd 32876) and the silent-exception behaviour
+- `save_share_config` / `save_mount_config` — removed `@return void` annotation (not valid Python)
+- `get_share_list` — return value now documents both the `list` and the `ports` keys
+- `write_mount_conf` — docstring now honestly describes it as a no-op stub kept for API compatibility, explaining that boot persistence is handled by `auto_mount()` reading `config/mount.json`
+- `get_nfsiostat` — clarified that this public endpoint returns raw text lines for the frontend; structured per-mount metrics are provided by the internal `_parse_nfsiostat()`
+- `get_nfs_ports` / `fix_mountd_port` — moved from the `# INTERNAL` section banner to a dedicated `# PORT CONFIGURATION` section, reflecting their public API status
+- `check_update` — return dict is now fully documented (`status`, `current`, `latest`, `has_update`, `release_url`, `release_name`, `msg`)
+- `__get_mod` — added docstring noting it is an unused named-mangled stub retained for potential future introspection by aaPanel
+- All 38 remaining docstrings — converted from `@param name<type>` / `@return type` Javadoc style to standard Python prose; parameter and return information is now expressed as plain text within the docstring body
+
 ---
 
 ## [1.1] - 2023-10-23
