@@ -16,7 +16,7 @@ and diagnose mount failures — all from a graphical panel interface.
 [![Python](https://img.shields.io/badge/python-3.6%2B-3776ab?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
 [![Platform](https://img.shields.io/badge/platform-Linux-FCC624?style=flat-square&logo=linux&logoColor=black)](https://github.com/jalexiscv/aaPanel-nfs-free)
 [![aaPanel](https://img.shields.io/badge/aaPanel-plugin-4A90D9?style=flat-square)](https://www.aapanel.com/)
-[![NFS](https://img.shields.io/badge/NFS-v3%20%7C%20v4-informational?style=flat-square)](README_EN.md#1-about-the-nfs-protocol)
+[![NFS](https://img.shields.io/badge/NFS-v3%20%7C%20v4-informational?style=flat-square)](docs/README_EN.md#1-about-the-nfs-protocol)
 
 <br/>
 
@@ -99,12 +99,12 @@ firewall rules, SysV init service and systemd service activation automatically.
 
 | Language | File |
 |----------|------|
-| 🇪🇸 Español | [README_ES.md](README_ES.md) |
-| 🇧🇷 Português | [README_PT.md](README_PT.md) |
-| 🇬🇧 English | [README_EN.md](README_EN.md) |
-| 🇯🇵 日本語 | [README_JA.md](README_JA.md) |
-| 🇩🇪 Deutsch | [README_DE.md](README_DE.md) |
-| 🇷🇺 Русский | [README_RU.md](README_RU.md) |
+| 🇪🇸 Español | [README_ES.md](docs/README_ES.md) |
+| 🇧🇷 Português | [README_PT.md](docs/README_PT.md) |
+| 🇬🇧 English | [README_EN.md](docs/README_EN.md) |
+| 🇯🇵 日本語 | [README_JA.md](docs/README_JA.md) |
+| 🇩🇪 Deutsch | [README_DE.md](docs/README_DE.md) |
+| 🇷🇺 Русский | [README_RU.md](docs/README_RU.md) |
 
 </div>
 
@@ -117,7 +117,7 @@ firewall rules, SysV init service and systemd service activation automatically.
 3. Commit your changes: `git commit -m 'Add: my feature'`
 4. Push and open a Pull Request
 
-See [README_EN.md](README_EN.md#12-contributing) for full contribution guidelines.
+See [README_EN.md](docs/README_EN.md#12-contributing) for full contribution guidelines.
 
 ---
 
