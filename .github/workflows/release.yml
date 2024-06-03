@@ -68,7 +68,7 @@ jobs:
         run: |
           VER="${{ steps.vars.outputs.VERSION }}"
           VER="${VER#v}"   # strip leading 'v'  →  v1.2 → 1.2
-          NOTES=$(awk "/^## \[$VER\]/{flag=1; next} /^## \[/{if(flag) exit} flag" CHANGELOG.md)
+          NOTES=$(awk "/^## \[$VER\]/{flag=1; next} /^## \[/{if(flag) exit} flag" docs/CHANGELOG.md)
           if [ -z "$NOTES" ]; then
             NOTES="See [CHANGELOG.md](CHANGELOG.md) for details."
           fi
