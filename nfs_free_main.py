@@ -37,7 +37,7 @@
 #  Email       : jalexiscv@gmail.com
 #  GitHub      : https://github.com/jalexiscv
 #  LinkedIn    : https://www.linkedin.com/in/jalexiscv/
-#  Version     : 1.1
+#  Version     : 1.2
 #  License     : MIT — Free Software
 #  Date        : July 3, 2023
 #  Copyright   : © 2023 Jose Alexis Correa Valencia
@@ -51,7 +51,7 @@ PANEL_PATH = '/www/server/panel'
 PLUGIN_PATH = PANEL_PATH + '/plugin/nfs_free'
 
 class nfs_free_main:
-    """Network File System (NFS) Manager v1.1 — Free Edition
+    """Network File System (NFS) Manager v1.2 — Free Edition
     File sharing based on NFS service.
     Features: share creation, remote mount, auto-mount at boot, server monitoring.
     """
@@ -1568,7 +1568,7 @@ class nfs_free_main:
 
         Returns a dict with the following keys:
           status       — True if the API call succeeded, False on network error
-          current      — installed version string (e.g. '1.1')
+          current      — installed version string (e.g. '1.2')
           latest       — latest published version from GitHub, or None on error
           has_update   — True when latest != current and latest is not empty
           release_url  — URL of the latest GitHub release page
@@ -1576,7 +1576,7 @@ class nfs_free_main:
           msg          — error message (only present when status is False)
         """
         import urllib.request
-        CURRENT    = '1.1'
+        CURRENT    = '1.2'
         REPO_API   = 'https://api.github.com/repos/jalexiscv/aaPanel-nfs-free/releases/latest'
         RELEASES   = 'https://github.com/jalexiscv/aaPanel-nfs-free/releases'
         cache_file = os.path.join(self._config_path, 'update_cache.json')
@@ -1633,4 +1633,4 @@ class nfs_free_main:
         Unused internally — kept as a named-mangled stub in case a future
         aaPanel version queries it via introspection.
         """
-        return {'name': 'nfs_free', 'version': '1.1', 'author': 'Jose Alexis Correa Valencia'}
+        return {'name': 'nfs_free', 'version': '1.2', 'author': 'Jose Alexis Correa Valencia'}

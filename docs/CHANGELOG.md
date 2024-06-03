@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [1.2] - 2024-06-03
+
 ### Changed
 
 #### Documentation — `nfs_free_main.py`
@@ -23,6 +27,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `check_update` — return dict is now fully documented (`status`, `current`, `latest`, `has_update`, `release_url`, `release_name`, `msg`)
 - `__get_mod` — added docstring noting it is an unused named-mangled stub retained for potential future introspection by aaPanel
 - All 38 remaining docstrings — converted from `@param name<type>` / `@return type` Javadoc style to standard Python prose; parameter and return information is now expressed as plain text within the docstring body
+
+#### Repository
+- Documentation files (`CHANGELOG.md`, `README_*.md`) moved to `docs/` directory; `README.md` links updated accordingly
 
 ---
 
@@ -105,6 +112,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/jalexiscv/aaPanel-nfs-free/compare/v1.1...HEAD
+[Unreleased]: https://github.com/jalexiscv/aaPanel-nfs-free/compare/v1.2...HEAD
+[1.2]: https://github.com/jalexiscv/aaPanel-nfs-free/compare/v1.1...v1.2
 [1.1]: https://github.com/jalexiscv/aaPanel-nfs-free/compare/v1.0...v1.1
 [1.0]: https://github.com/jalexiscv/aaPanel-nfs-free/releases/tag/v1.0
