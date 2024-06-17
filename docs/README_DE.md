@@ -62,6 +62,8 @@ NFS arbeitet nach dem Client/Server-Modell: Der Server **exportiert** ein Verzei
 
 ## 2. Plugin-Funktionen
 
+Dieses kostenlose Open-Source-Plugin für aaPanel vereinfacht die Verwaltung des Network File System (NFS) über eine grafische Oberfläche. Es ermöglicht Administratoren, NFS-Exporte zu verwalten, Remote-Verzeichnisse einzubinden und die automatische Bereitstellung von Freigaben beim Systemstart zu konfigurieren. Eine intelligente Diagnose-Engine identifiziert Verbindungsfehler und schlägt gezielte Lösungen für Netzwerkprobleme vor. Benutzer können die Serverleistung in Echtzeit überwachen und detaillierte Aktivitätsprotokolle einsehen, um die Betriebssicherheit zu gewährleisten. Automatisierte Installationsskripte und mehrsprachige Unterstützung erleichtern den weltweiten Einsatz in Linux-Umgebungen.
+
 - **Shares (NFS-Exporte):** Legt fest, welche lokalen Verzeichnisse für Remote-Clients zugänglich sind, mit IP-Zugriffskontrolle (CIDR), Lese-/Schreibmodus, Synchronisation und Squash-Richtlinie für Berechtigungen.
 - **Mounts (Remote-Einbindungen):** Verbindet freigegebene Ressourcen anderer NFS-Server mit vollständigen Protokolloptionen: Version (NFSv3/NFSv4), Blockgröße (rsize/wsize), Timeouts, TCP/UDP, Hard/Soft-Mount.
 - **Serverüberwachung:** Status von `nfs-server` und `rpcbind`, registrierte RPC-Dienste, Protokollstatistiken aus `/proc/net/rpc`, I/O-Metriken pro Einbindung via `nfsiostat`.

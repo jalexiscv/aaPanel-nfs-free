@@ -62,6 +62,8 @@ O NFS opera no modelo cliente/servidor: o servidor **exporta** um diretório e o
 
 ## 2. Funcionalidades do plugin
 
+Este plugin gratuito e de código aberto para aaPanel simplifica a administração do Sistema de Arquivos de Rede (NFS) por meio de uma interface gráfica. Permite que administradores gerenciem exportações NFS, montem diretórios remotos e configurem a inicialização automática de compartilhamentos na inicialização do sistema. Um mecanismo de diagnóstico inteligente identifica falhas de conexão e sugere soluções específicas para problemas de rede. Os usuários podem monitorar o desempenho do servidor em tempo real e revisar registros de atividade detalhados para garantir a segurança operacional. Scripts de instalação automatizados e suporte multilíngue tornam a implantação global em ambientes Linux simples e acessível.
+
 - **Shares (exportações NFS):** define quais diretórios locais são acessíveis por clientes remotos, com controle de IPs autorizados (CIDR), modo leitura/escrita, sincronização e política de squash de permissões.
 - **Mounts (montagens remotas):** conecta recursos compartilhados de outros servidores NFS com opções completas de protocolo: versão (NFSv3/NFSv4), tamanho de bloco (rsize/wsize), timeouts, TCP/UDP, hard/soft mount.
 - **Monitoramento do servidor:** estado de `nfs-server` e `rpcbind`, serviços RPC registrados, estatísticas de protocolo do `/proc/net/rpc`, métricas de I/O por montagem via `nfsiostat`.

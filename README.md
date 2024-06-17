@@ -28,6 +28,8 @@ and diagnose mount failures — all from a graphical panel interface.
 
 ---
 
+This free, open-source plugin for aaPanel simplifies the administration of the Network File System (NFS) through a graphical interface. It enables administrators to manage NFS exports, mount remote directories and configure automatic startup of shares at boot time. An intelligent diagnostic engine identifies connection failures and suggests targeted solutions for network problems. Users can monitor server performance in real time and review detailed activity logs to ensure operational security. Automated installation scripts and multilingual support make global deployment on Linux environments straightforward.
+
 ## Features
 
 | | |
