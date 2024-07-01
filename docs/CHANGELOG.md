@@ -9,6 +9,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Documentation
+
+#### Repository
+- `README.md` — version badge corrected from `1.1` to `1.2`
+
+### Fixed
+
+#### Backend — `nfs_free_main.py`
+- `create_share` / `modify_share` — add IP/CIDR format validation before writing to `/etc/exports`; currently any string is accepted without verification
+- `get_overview` — wrap each data source (`nfsiostat`, `get_server_status`, `get_share_list`, etc.) in individual try/except blocks so a failure in one section does not take down the entire dashboard
+- `exec_shell` — audit all call sites to ensure no user-supplied input reaches the shell string unescaped; `shell=True` combined with unsanitised parameters is a potential command-injection vector
+
+### Changed
+
+#### Backend — `nfs_free_main.py`
+- `_diagnose_mount_failure` — refactor into named sub-steps (reachability, port check, export enumeration, CIDR validation, kernel error analysis) to reduce method length and improve readability
+
+#### Scripts
+- `upgrade.sh` — extend to also upgrade the plugin itself: download the latest release zip from GitHub Releases, extract over the current installation, and restart the init service; currently only updates NFS system packages
+- `repair.sh` — additionally verify and restore plugin file permissions in addition to re-applying fixed-port configuration
+
+### Added
+
+#### Repository infrastructure
+- `SECURITY.md` — document the vulnerability reporting process (contact channel, expected response time, supported versions)
+- `.github/workflows/ci.yml` — add a CI workflow triggered on every push to `main` that runs `flake8` and `pylint` against `nfs_free_main.py`
+
 ---
 
 ## [1.2] - 2024-06-03
